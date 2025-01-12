@@ -7,10 +7,10 @@ const register = async (req, res) => {
         return res.status(400).json({ code: 1, msg: error.details.reduce((prev,i)=> prev + i.message+";","") });
     }
 
-    const { username, password } = req.body;
+    const {email, password } = req.body;
 
     try {
-        const user = await userService.registerUser(username, password);
+        const user = await userService.registerUser(email, password);
         res
             .status(201)
             .json({ code: 0, msg: "User registered successfully", data: user });
