@@ -18,9 +18,14 @@ const loginUser=async ({email,password})=>{
     if(!user){
         throw new Error('User is not exists');
     }
+    
     const isMatched=await bcrypt.compare(password,user.password);
     if(!isMatched){
         throw new Error('Invalid password');
+    }
+
+    if(!user.isVerified){
+        throw new Error('User is not verified');
     }
     return user;
 }
