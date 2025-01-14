@@ -4,7 +4,7 @@ const userSchema=new mongoose.Schema({
     email:{type:String,required:true,unique:true},
     password:{type:String,required:true},
     isVerified:{type:Boolean,required:true}
-},{versionKey:false})
+},{timestamps:true,versionKey:false})
 
 userSchema.methods.toJSON=function(){
     const user=this.toObject();
