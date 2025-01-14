@@ -26,4 +26,23 @@ const validateRegister=(data)=>{
     return registerValidationSchema.validate(data,{abortEarly:false})
 }
 
-module.exports={validateRegister}
+
+const loginValidationSchema=Joi.object({
+    email:Joi.string().email().required().messages({
+        'string.base':'email must be a string',
+        'string.empty':'email cannot be empty',
+        'any.required':'email is required',
+        'string.email':'email must be a valid email'
+    }),
+    password:Joi.string().min(1).max(20).required().messages({
+        'string.base':'password must be a string',
+        'string.empty':'password cannot be empty',
+        'string.min':'password must be atleast 1 character long',
+        'string.max':'password must be atmost 20 characters long',
+        'any.required':'password is required'
+    }),})
+
+const validateLogin=(data)=>{
+    return loginValidationSchema.validate(data,{abortEarly:false})
+}
+module.exports={validateRegister,validateLogin}
