@@ -44,8 +44,8 @@ const verify=async(req,res)=>{
         const payload= jwt.verify(token,process.env.SECRET_KEY)
         const {userId}=payload;
         await userService.verifyUser(userId);
-        // res.status(200).json({code:0,msg:"User verified successfully"})
-        return res.redirect(`${process.env.BASE_URI}/login`)
+        res.status(200).json({code:0,msg:"User verified successfully"})
+        // return res.redirect(`${process.env.BASE_URI}/login`)
     }catch(e){
         res.status(400).json({code:1,msg:e.message})
     }

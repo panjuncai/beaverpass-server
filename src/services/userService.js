@@ -5,7 +5,6 @@ const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 require('../config/env')();
 
-const filter = { password: 0 };
 
 const registerUser = async ({ email, password }) => {
   try {
