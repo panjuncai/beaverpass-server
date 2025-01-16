@@ -13,13 +13,16 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "connect-redis": "^8.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-session": "^1.18.1",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.4",
-    "nodemailer": "^6.9.16"
+    "nodemailer": "^6.9.16",
+    "redis": "^4.7.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
