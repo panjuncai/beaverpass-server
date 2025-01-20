@@ -28,9 +28,10 @@ const login = async (req, res) => {
     try {
         const user = await userService.loginUser(req.body);
         // generate JWT
-        const token = jwt.sign({ userId: user._id, email: user.email }, process.env.SECRET_KEY_JWT, { expiresIn: "1h" })
+        const token = jwt.sign({ userId: user._id, email: user.email }, 'miaowu', { expiresIn: "1h" })
 
         req.session.jwt=token;
+        console.log('Stored token in session:', req.session.jwt);
         res.status(200).json({ code: 0, msg:"Login successfully", data: user })
     } catch (e) {
         res.status(400).json({ code: 1, msg: e.message })

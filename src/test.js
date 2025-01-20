@@ -9,16 +9,6 @@ redisClient.on('error', (err) => console.error(`Redis error:${err}`))
 redisClient.on('connect', () => console.log('Connected to Redis'))
 redisClient.connect()// v4 redis should connect
 
-    // (async () => {
-    //     try {
-    //         redisClient.connect()// v4 redis should connect
-    //         console.log('Redis connected')
-    //     }
-    //     catch (e) {
-    //         console.error('Failed to connect to Redis:', e)
-    //     }
-    // })()
-
 app.use(session({
     store: new RedisStore({
         client: redisClient

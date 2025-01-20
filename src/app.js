@@ -25,7 +25,7 @@ app.use(session({
     store:new RedisStore({
         client:redisClient
     }),
-    secret:process.env.SECRET_KEY_JWT,
+    secret:'miaowu',
     resave:false,
     saveUninitialized:false,
     cookie:{
