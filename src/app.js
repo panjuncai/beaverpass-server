@@ -14,7 +14,7 @@ redisClient.on('connect',()=>console.log('Connected to Redis'))
 redisClient.connect()// v4 redis should connect
 
 const app=express()
-const PORT=process.env.PORT||4000
+const PORT=process.env.PORT||4001
 
 connectDB()
 

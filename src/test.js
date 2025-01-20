@@ -33,6 +33,6 @@ app.get('/count', (req, res) => {
     }
 });
 
-app.listen(4000, () => {
-    console.log('Server is running at port 3000')
+app.listen(4001, () => {
+    console.log('Server is running at port 4001')
 })

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const authMiddleware = (req, res, next) => {
   const token = req.session.jwt;
-  console.log('JWT from session:',token);
+  // console.log('JWT from session:',token);
   if (!token) {
     return res.status(401).json({ code: 1, msg: "Unauthorized" });
   }
