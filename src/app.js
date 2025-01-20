@@ -31,7 +31,7 @@ app.use(session({
     cookie:{
         httpOnly:true,// prevent client access cookie
         // secure:process.env.NODE_ENV==='production',
-        maxAge:60000 // one minute expire
+        maxAge:600000 // one hour expire
     }
 }))
 

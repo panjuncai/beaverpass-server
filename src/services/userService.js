@@ -95,6 +95,7 @@ const verifyUser=async (userId)=>{
 
 const getUser=async (userId)=>{
     try{
+      // console.log(`user service userid is ${userId}`)
         const user=await User.findById(userId);
         if(!user){
             throw new Error('User is not exists');
