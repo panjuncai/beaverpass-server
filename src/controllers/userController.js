@@ -38,6 +38,28 @@ const login = async (req, res) => {
     }
 }
 
+const logout=async (req,res)=>{
+    try{
+       req.session.destroy((e)=>{
+        if(e){
+            console.error('Error destroying session:',e)
+            return res.status(500).json({
+                code:1,msg:`Logout failed:${e.message}`
+            })
+        }
+        res.clearCookie("connect.sid",{
+            httpOnly:true,
+            secure:process.env.NODE_ENV==='production'
+        })
+        res.status(200).json({code:0,msg:'Logout successfully'})
+        console.log('Logout successfully')
+       }) 
+    }catch(e){
+        console.error("Error during logout:", e);
+        res.status(400),json({code:1,msg:e.message})
+    }
+}
+
 const verify = async (req, res) => {
     try {
         const { token } = req.query;
@@ -65,4 +87,4 @@ const user=async (req,res)=>{
     }
 }
 
-module.exports = { register, login, verify,user };
+module.exports = { register, login,logout, verify,user };

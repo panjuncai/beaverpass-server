@@ -74,6 +74,7 @@ const loginUser = async ({ email, password }) => {
   }
 };
 
+
 const verifyUser=async (userId)=>{
     try{
         const user=await User.findById(userId);
