@@ -22,7 +22,7 @@ const registerUser = async ({ email, password }) => {
     await user.save();
 
     // verify token
-    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
+    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY_VERIFY, {
       expiresIn: "1d",
     });
 

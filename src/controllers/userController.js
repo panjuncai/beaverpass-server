@@ -28,7 +28,7 @@ const login = async (req, res) => {
     try {
         const user = await userService.loginUser(req.body);
         // generate JWT
-        const token = jwt.sign({ userId: user._id, email: user.email }, process.env.SECRET_KEY_JWT, { expiresIn: "1h" })
+        const token = jwt.sign({ userId: user._id, email: user.email }, process.env.SECRET_KEY_VERIFY, { expiresIn: "1h" })
 
         req.session.jwt=token;
         // console.log('Stored token in session:', req.session.jwt);
