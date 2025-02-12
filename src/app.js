@@ -4,6 +4,7 @@ const bodyParser=require('body-parser')
 const cors=require('cors')
 const connectDB=require('./config/db')
 const userRoutes=require('./routes/userRoutes')
+const categoryRoutes=require('./routes/categoryRoutes')
 
 const session=require('express-session')
 const {RedisStore}=require('connect-redis')
@@ -45,6 +46,7 @@ app.use((req,res,next)=>{
 // });
 
 app.use('/users',userRoutes)
+app.use('/categories',categoryRoutes)
 
 
 app.listen(PORT,()=>{
