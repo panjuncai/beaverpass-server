@@ -32,7 +32,7 @@ app.use(session({
     saveUninitialized:false,
     cookie:{
         httpOnly:true,// prevent client access cookie
-        secure:process.env.NODE_ENV==='production',
+        // secure:process.env.NODE_ENV==='production',//必须开启 https才能设置
         maxAge:600000 // one hour expire
     }
 }))
