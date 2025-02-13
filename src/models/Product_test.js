@@ -1,15 +1,10 @@
 const mongoose = require("mongoose");
 const Product = require("./Product"); // 调整为你的 Product 模型文件路径
 
-// 连接 MongoDB
-mongoose
-  .connect("mongodb://127.0.0.1:27017/beaverpass", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(async () => {
-    console.log("Connected to MongoDB");
+const connectDB = require("../config/db");
+connectDB();
 
+async function test() {
     // 准备 5 条 mock 数据
     const products = [
       {
@@ -99,7 +94,6 @@ mongoose
       // 断开连接
       mongoose.disconnect();
     }
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-  });
+  }
+
+  test();

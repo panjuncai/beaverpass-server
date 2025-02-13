@@ -30,6 +30,12 @@ const orderSchema = new mongoose.Schema(
       type: productSnapshotSchema,
       required: true,
     },
+    amount: { type: Number, required: true },
+    deliveryFee:{ type: Number, required: true },
+    tax: { type: Number, required: true },
+    serviceFee: { type: Number, required: true },
+    paymentFee: { type: Number, required: true },
+    total: { type: Number, required: true },
     status: {
       type: String,
       enum: [

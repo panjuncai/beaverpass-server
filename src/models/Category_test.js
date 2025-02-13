@@ -2,12 +2,8 @@
 const mongoose = require("mongoose");
 const Category = require("./Category");
 
-// 连接你的 MongoDB 数据库
-mongoose.connect("mongodb://127.0.0.1:27017/beaverpass", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
+const connectDB=require('../config/db')
+connectDB();
 async function createCategories() {
   try {
     // 第一个分类（顶级分类）
