@@ -1,7 +1,17 @@
 const mongoose = require("mongoose");
 const Order = require("./Order"); // 根据实际情况调整路径
 
-const connectDB = require("../config/db");
+const dbUri ='mongodb://localhost:27017/beaverpass'; 
+const connectDB = async () => {
+  try {
+    await mongoose.connect(dbUri);
+    console.log("MongoDB Connected");
+  } catch (e) {
+    console.error("MongoDB connection error:", e);
+    process.exit(1);
+  }
+};
+
 connectDB();
 
 async function test() {
