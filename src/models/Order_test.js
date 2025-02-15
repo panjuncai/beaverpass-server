@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Order = require("./Order"); // 根据实际情况调整路径
 
 const dbUri ='mongodb://localhost:27017/beaverpass'; 
+// const dbUri ='mongodb://root:iamveryStrong!@101.133.149.17:26214/beaverpass?authSource=admin'; 
 const connectDB = async () => {
   try {
     await mongoose.connect(dbUri);
