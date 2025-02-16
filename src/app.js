@@ -3,7 +3,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const connectDB = require("./config/db");
-const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("./routes/authRoutes");
+const userRoutes=require("./routes/userRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
 
@@ -59,9 +60,10 @@ app.use((req, res, next) => {
 //     res.send("hello");
 // });
 
-app.use("/users", userRoutes);
+app.use("/auth", authRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
+app.use("/users",userRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

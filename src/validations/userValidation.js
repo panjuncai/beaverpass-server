@@ -1,6 +1,20 @@
 const Joi=require('joi')
 
 const registerValidationSchema=Joi.object({
+    firstName:Joi.string().min(1).max(20).required().messages({
+        'string.base':'firstName must be a string',
+        'string.empty':'firstName cannot be empty',
+        'string.min':'firstName must be atleast 1 character long',
+        'string.max':'firstName must be atmost 20 characters long',
+        'any.required':'firstName is required'
+    }),
+    lastName:Joi.string().min(1).max(20).required().messages({
+        'string.base':'lastName must be a string',
+        'string.empty':'lastName cannot be empty',
+        'string.min':'lastName must be atleast 1 character long',
+        'string.max':'lastName must be atmost 20 characters long',
+        'any.required':'lastName is required'
+    }),
     email:Joi.string().email().required().messages({
         'string.base':'email must be a string',
         'string.empty':'email cannot be empty',

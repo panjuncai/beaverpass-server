@@ -12,4 +12,17 @@ const getAllProducts=async ()=>{
     }
 }
 
-module.exports = { getAllProducts };
+const getProductById=async (productId)=>{
+    try{
+        const product=await Product.findById(productId);
+        if(!product){
+            throw new Error('Product is not exists');
+        }
+        return product;
+    }
+    catch(e){
+        throw e;
+    }
+}
+
+module.exports = { getAllProducts , getProductById };
