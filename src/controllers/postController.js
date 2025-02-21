@@ -4,7 +4,7 @@ const createPost = async (req, res) => {
   try {
     const postData = {
       ...req.body,
-      author: req.userId
+      poster: req.userId
     };
     console.log(postData);
     const post = await postService.createPost(postData);

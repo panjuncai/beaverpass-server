@@ -54,7 +54,7 @@ const postSchema = new mongoose.Schema({
     required: true,
     enum: ["Home Delivery", "Pickup", "Both"]
   },
-  author: {
+  poster: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true

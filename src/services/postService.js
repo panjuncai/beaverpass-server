@@ -43,7 +43,7 @@ const getAllPosts = async (filters) => {
     }
 
     const posts = await Post.find(query)
-      .populate('author', 'username')
+      .populate('poster', 'username')
       .sort({ createdAt: -1 });
 
     if (!posts) {
@@ -59,7 +59,7 @@ const getAllPosts = async (filters) => {
 const getPostById = async (postId) => {
   try {
     const post = await Post.findById(postId)
-      .populate('author', 'username');
+      .populate('poster', 'username');
 
     if (!post) {
       throw new Error('Post not found');
@@ -79,7 +79,7 @@ const updatePostStatus = async (postId, status, userId) => {
       throw new Error('Post not found');
     }
 
-    if (post.author.toString() !== userId.toString()) {
+    if (post.poster.toString() !== userId.toString()) {
       throw new Error('Not authorized');
     }
 

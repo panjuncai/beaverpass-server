@@ -5,13 +5,13 @@ const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 require("../config/env")();
 
-const registerUser = async ({ email, password }) => {
+const registerUser = async ({ email, password, firstName, lastName }) => {
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw new Error("User already exists");
     }
-
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       email,
@@ -20,6 +20,7 @@ const registerUser = async ({ email, password }) => {
       password: hashedPassword,
       isVerified: false,
     });
+    
     await user.save();
 
     // verify token
