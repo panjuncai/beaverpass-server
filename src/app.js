@@ -5,7 +5,6 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes=require("./routes/userRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const postRoutes = require("./routes/postRoutes");
 
@@ -60,7 +59,6 @@ app.use((req, res, next) => {
 
 
 app.use("/auth", authRoutes);
-app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
 app.use("/users",userRoutes)
 app.use("/posts", postRoutes);
