@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes=require("./routes/userRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
+const postRoutes = require("./routes/postRoutes");
 
 const session = require("express-session");
 const { RedisStore } = require("connect-redis");
@@ -33,7 +34,8 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit:'10mb'}));
+app.use(bodyParser.urlencoded({extended:true,limit:'10mb'}));
 
 app.use(
   session({
@@ -56,14 +58,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.get('/',(req,res) => {
-//     res.send("hello");
-// });
 
 app.use("/auth", authRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
 app.use("/users",userRoutes)
+app.use("/posts", postRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
