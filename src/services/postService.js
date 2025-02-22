@@ -33,7 +33,7 @@ const createPost = async (postData) => {
 const getAllPosts = async (filters) => {
   try {
     const { category, condition, priceRange } = filters;
-    const query = { status: 'active' };
+    const query = { status: {$ne:'deleted'} };
 
     if (category) query.category = category;
     if (condition) query.condition = condition;

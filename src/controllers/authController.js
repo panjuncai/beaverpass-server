@@ -43,12 +43,20 @@ const login = async (req, res) => {
     const user = await authService.loginUser(req.body);
     // generate JWT
     const token = jwt.sign(
-      { userId: user._id, email: user.email, user },
+      { user },
       process.env.SECRET_KEY_JWT,
-      { expiresIn: "24h" }
+      { expiresIn: "5m" }
     );
 
+    // 生成刷新令牌，有效期14天
+    const refreshToken = jwt.sign(
+        { userId: user._id,type:'refresh' },
+        'refresh_token_secret',
+        { expiresIn: "14d" }
+      );
+
     req.session.jwt = token;
+    req.session.refreshToken = refreshToken;
     // console.log('Stored token in session:', req.session.jwt);
     res.status(200).json({ code: 0, msg: "Login successfully", data: user });
   } catch (e) {

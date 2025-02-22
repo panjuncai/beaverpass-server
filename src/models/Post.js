@@ -61,7 +61,7 @@ const postSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'sold', 'deleted'],
+    enum: ['active','inactive', 'sold', 'deleted'],
     default: 'active'
   }
 }, {
