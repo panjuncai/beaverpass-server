@@ -48,7 +48,7 @@ app.use(
     cookie: {
       httpOnly: true, // prevent client access cookie
       // secure:process.env.NODE_ENV==='production',//必须开启 https才能设置
-      maxAge: 1000*60*60*24 // 1 day
+      maxAge: 1000*60*60*24*14 // 14 days
     },
   })
 );
