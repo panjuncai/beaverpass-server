@@ -98,25 +98,11 @@ const verify = async (req, res) => {
 };
 
 const checkSession = async (req, res) => {
-  const token = req.session.jwt;
-  // console.log('JWT from session:',token);
-  if (!token) {
-    return res.status(401).json({ code: 4001, msg: "Unauthorized" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY_JWT);
-    req.userId = decoded.userId;
-    req.user = decoded.user;
-    console.log(`req.user is ${JSON.stringify(req.user)}`);
-    res.status(200).json({ code: 0, msg: "Session is valid", data: req.user });
-  } catch (e) {
-    if (e.name === "TokenExpiredError") {
-      res.status(403).json({ code: 1, msg: "Token expired" });
-    } else {
-      res.status(403).json({ code: 1, msg: e.message });
+    if(req.user){
+        res.status(200).json({code:0,msg:"Session is valid",data:req.user})
+    }else{
+        res.status(400).json({code:4001,msg:"Unauthorized"})
     }
-  }
 };
 
 module.exports = { register, login, logout, verify, checkSession };

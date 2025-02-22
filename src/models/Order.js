@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
-const productSnapshotSchema = new mongoose.Schema(
+const postSnapshotSchema = new mongoose.Schema(
   {
-    productId: {
+    postId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "Post",
       required: true,
     },
     title: { type: String, required: true },
@@ -26,8 +26,8 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    productSnapshot: {
-      type: productSnapshotSchema,
+    postSnapshot: {
+      type: postSnapshotSchema,
       required: true,
     },
     amount: { type: Number, required: true },
