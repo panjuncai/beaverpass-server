@@ -45,7 +45,7 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { user },
       process.env.SECRET_KEY_JWT,
-      { expiresIn: "5m" }
+      { expiresIn: "14d" }
     );
 
     // 生成刷新令牌，有效期14天
