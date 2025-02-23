@@ -20,6 +20,7 @@ const createOrder = async (orderData) => {
     // 设置卖家ID
     orderData.sellerId = post.poster;
 
+    // console.log('orderData:',orderData);
     // 创建订单
     const order = new Order(orderData);
     await order.save();

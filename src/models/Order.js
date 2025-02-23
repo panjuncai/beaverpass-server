@@ -9,7 +9,12 @@ const postSnapshotSchema = new mongoose.Schema(
     },
     title: { type: String, required: true },
     price: { type: Number, required: true },
-    images: [{ type: String }],
+    images: {
+      FRONT: { type: String },
+      BACK: { type: String },
+      LEFT: { type: String },
+      RIGHT: { type: String }
+    }
   },
   { _id: false }
 ); // 子文档，不需要 _id

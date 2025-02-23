@@ -97,8 +97,8 @@ const getPostsByUserId = async (userId) => {
       poster: userId,
       status: { $ne: 'deleted' } // 排除已删除的帖子
     }).sort({ createdAt: -1 }); // 按创建时间倒序
-    console.log('getPostsByUserId userId:',userId);
-    console.log('getPostsByUserId posts:',posts);
+    // console.log('getPostsByUserId userId:',userId);
+    // console.log('getPostsByUserId posts:',posts);
     return posts;
   } catch (error) {
     throw new Error(`Failed to get user posts: ${error.message}`);
