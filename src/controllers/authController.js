@@ -48,15 +48,7 @@ const login = async (req, res) => {
       { expiresIn: "14d" }
     );
 
-    // 生成刷新令牌，有效期14天
-    const refreshToken = jwt.sign(
-        { userId: user._id,type:'refresh' },
-        'refresh_token_secret',
-        { expiresIn: "14d" }
-      );
-
     req.session.jwt = token;
-    req.session.refreshToken = refreshToken;
     // console.log('Stored token in session:', req.session.jwt);
     res.status(200).json({ code: 0, msg: "Login successfully", data: user });
   } catch (e) {
@@ -66,6 +58,7 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
+    // 1. 清除 session
     req.session.destroy((e) => {
       if (e) {
         console.error("Error destroying session:", e);
@@ -74,11 +67,13 @@ const logout = async (req, res) => {
           msg: `Logout failed:${e.message}`,
         });
       }
+      // 2. 清除 cookie
       res.clearCookie("connect.sid", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        // secure: process.env.NODE_ENV === "production",
       });
-      res.status(200).json({ code: 0, msg: "Logout successfully" });
+
+      res.status(200).json({ code: 0, msg: "Logout successfully"});
       console.log("Logout successfully");
     });
   } catch (e) {

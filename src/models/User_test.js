@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const User = require("./User"); // 调整为你的 Product 模型文件路径
+const User = require("./User"); 
 
 const dbUri ='mongodb://localhost:27017/beaverpass'; 
 // const dbUri ='mongodb://root:iamveryStrong!@101.133.149.17:26214/beaverpass?authSource=admin'; 

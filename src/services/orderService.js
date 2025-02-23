@@ -6,15 +6,15 @@ const createOrder = async (orderData) => {
     // 获取商品信息创建快照
     const post = await Post.findById(orderData.postSnapshot.postId);
     if (!post) {
-      throw new Error("Product is not exists");
+      throw new Error("Post is not exists");
     }
     if (post.status !== "active") {
-      throw new Error("Product is not available");
+      throw new Error("Post is not available");
     }
 
     // 验证卖家不能购买自己的商品
     if (post.poster.toString() === orderData.buyerId.toString()) {
-      throw new Error("Cannot buy your own product");
+      throw new Error("Cannot buy your own post");
     }
 
     // 设置卖家ID

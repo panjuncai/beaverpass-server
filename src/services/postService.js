@@ -91,9 +91,24 @@ const updatePostStatus = async (postId, status, userId) => {
   }
 };
 
+const getPostsByUserId = async (userId) => {
+  try {
+    const posts = await Post.find({ 
+      poster: userId,
+      status: { $ne: 'deleted' } // 排除已删除的帖子
+    }).sort({ createdAt: -1 }); // 按创建时间倒序
+    console.log('getPostsByUserId userId:',userId);
+    console.log('getPostsByUserId posts:',posts);
+    return posts;
+  } catch (error) {
+    throw new Error(`Failed to get user posts: ${error.message}`);
+  }
+};
+
 module.exports = {
   createPost,
   getAllPosts,
   getPostById,
-  updatePostStatus
+  updatePostStatus,
+  getPostsByUserId
 }; 

@@ -41,9 +41,27 @@ const updatePostStatus = async (req, res) => {
   }
 };
 
+const getMyPosts = async (req, res) => {
+  try {
+    // req.user 来自 auth 中间件
+    const posts = await postService.getPostsByUserId(req.user._id);
+    res.status(200).json({
+      code: 0,
+      msg: "Get my posts successfully",
+      data: posts
+    });
+  } catch (error) {
+    res.status(400).json({
+      code: 1,
+      msg: error.message
+    });
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
   getPostById,
-  updatePostStatus
+  updatePostStatus,
+  getMyPosts
 }; 

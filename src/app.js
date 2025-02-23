@@ -5,7 +5,6 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes=require("./routes/userRoutes");
-const productRoutes = require("./routes/productRoutes");
 const postRoutes = require("./routes/postRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 
@@ -49,6 +48,7 @@ app.use(
       httpOnly: true, // prevent client access cookie
       // secure:process.env.NODE_ENV==='production',//必须开启 https才能设置
       maxAge: 1000*60*60*24*14 // 14 days
+      // maxAge: 1000*60*2 // 2min
     },
   })
 );
@@ -60,7 +60,6 @@ app.use((req, res, next) => {
 
 
 app.use("/auth", authRoutes);
-app.use("/products", productRoutes);
 app.use("/users",userRoutes)
 app.use("/posts", postRoutes);
 app.use("/orders", orderRoutes);
