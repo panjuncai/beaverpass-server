@@ -2,32 +2,42 @@ const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema(
   {
-    conversationId: {
+    roomId: {
       type: mongoose.Schema.Types.ObjectId,
-      // 如果需要单独做 Conversation 表，可以 ref: 'Conversation'
-      // 否则这里留空或改成一个单独的标识
+      ref: "ChatRoom",
       required: true,
     },
-    fromUserId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    toUserId: {
+    senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    // 如果消息与商品或订单相关，也可增加以下字段
-    // productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    // orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
-
-    content: { type: String, default: "" },
+    content: {
+      type: String,
+      required: function() {
+        return this.messageType !== "post";  // 只有非post类型消息才需要content
+      }
+    },
+    postId: {  // 添加 post 字段
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+      required: function() {
+        return this.messageType === "post";  // 只有post类型消息才需要post
+      }
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
     messageType: {
       type: String,
-      enum: ["text", "image", "system"],
+      enum: ["text", "image", "post"],
       default: "text",
     },
+    readBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
   },
   {
     timestamps: true,

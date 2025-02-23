@@ -7,7 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes=require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const orderRoutes = require("./routes/orderRoutes");
-
+const chatRoutes = require("./routes/chatRoutes");
 const session = require("express-session");
 const { RedisStore } = require("connect-redis");
 const redis = require("redis");
@@ -63,6 +63,7 @@ app.use("/auth", authRoutes);
 app.use("/users",userRoutes)
 app.use("/posts", postRoutes);
 app.use("/orders", orderRoutes);
+app.use("/chat", chatRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
