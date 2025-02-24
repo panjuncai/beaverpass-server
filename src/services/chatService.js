@@ -13,7 +13,7 @@ const getChatRooms = async (userId) => {
       select: 'content createdAt senderId messageType postId'
     })
     .sort({ 'lastMessage.createdAt': -1 });
-
+    console.log(`rooms is ${JSON.stringify(rooms)}`)
     return rooms;
   } catch (error) {
     throw new Error(`Failed to get chat rooms: ${error.message}`);
@@ -33,7 +33,7 @@ const getChatMessages = async (roomId, userId) => {
     }
 
     const messages = await Message.find({ roomId })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .populate('senderId', 'firstName lastName avatar');
 
     // 标记消息为已读
@@ -73,7 +73,7 @@ const sendMessage = async (roomId, senderId, { content, postId, messageType = 't
       readBy: [senderId],
       createdAt: new Date()
     };
-
+    console.log(`messageData is ${JSON.stringify(messageData)}`);
     // 根据消息类型设置相应的字段
     if (messageType === 'post') {
       messageData.postId = postId;
