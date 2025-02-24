@@ -10,7 +10,7 @@ router.use(auth);
 router.get('/rooms', chatController.getChatRooms);
 
 // 获取与特定用户的聊天室
-router.get('/rooms/user/:sellerId', chatController.getRoomWithUser);
+router.get('/rooms/user/:userId', chatController.getRoomWithUser);
 
 // 获取特定聊天室的消息
 router.get('/rooms/:roomId/messages', chatController.getChatMessages);

@@ -10,11 +10,7 @@ const getChatRooms = async (userId) => {
     .populate('participants', 'firstName lastName avatar unreadCount')
     .populate({
       path: 'lastMessage',
-      select: 'content createdAt senderId messageType post',
-      populate: {
-        path: 'post',  // 如果是帖子消息，populate lastMessage 中的 post
-        select: 'title price images'
-      }
+      select: 'content createdAt senderId messageType postId'
     })
     .sort({ 'lastMessage.createdAt': -1 });
 
@@ -180,11 +176,7 @@ const findRoomWithUser = async (userId, sellerId) => {
     .populate('participants', 'firstName lastName avatar unreadCount')
     .populate({
       path: 'lastMessage',
-      select: 'content createdAt senderId messageType post',
-      populate: {
-        path: 'post',
-        select: 'title price images'
-      }
+      select: 'content createdAt senderId messageType postId'
     });
 
     return room;  // 如果没找到会返回 null

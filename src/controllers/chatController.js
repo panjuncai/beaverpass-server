@@ -77,8 +77,8 @@ const markAsRead = async (req, res) => {
 
 const getRoomWithUser = async (req, res) => {
   try {
-    const { sellerId } = req.params;
-    const room = await chatService.findRoomWithUser(req.user._id, sellerId);
+    const { userId } = req.params;
+    const room = await chatService.findRoomWithUser(req.user._id, userId);
     
     res.status(200).json({
       code: 0,
