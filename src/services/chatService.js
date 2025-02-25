@@ -1,6 +1,7 @@
 const ChatRoom = require('../models/ChatRoom');
 const Message = require('../models/Message');
 const User = require('../models/User');
+const socketIO = require('../socket');  // 只引入模块，不立即获取实例
 
 const getChatRooms = async (userId) => {
   try {
@@ -65,7 +66,6 @@ const sendMessage = async (roomId, senderId, { content, postId, messageType = 't
       throw new Error('Chat room not found or access denied');
     }
 
-    // 创建消息对象
     const messageData = {
       roomId,
       senderId,
@@ -73,18 +73,24 @@ const sendMessage = async (roomId, senderId, { content, postId, messageType = 't
       readBy: [senderId],
       createdAt: new Date()
     };
-    console.log(`messageData is ${JSON.stringify(messageData)}`);
-    // 根据消息类型设置相应的字段
+
     if (messageType === 'post') {
       messageData.postId = postId;
     } else {
       messageData.content = content;
     }
-    console.log(messageData);
-    // 创建新消息
-    const message = await Message.create(messageData);
 
-    // 更新聊天室的最后一条消息和未读计数
+    const message = await Message.create(messageData);
+    
+    // 创建消息后通过Socket.IO发送到房间
+    const populatedMessage = await Message.findById(message._id)
+      .populate('senderId', 'firstName lastName avatar');
+    
+    // 在需要使用时获取 io 实例
+    const io = socketIO.getIO();
+    io.to(roomId).emit('new_message', populatedMessage);
+
+    // 更新聊天室
     await ChatRoom.findByIdAndUpdate(roomId, {
       lastMessage: message,
       $inc: {
@@ -148,7 +154,6 @@ const createChatRoom = async (buyerId, sellerId) => {
 // 添加新方法：标记消息为已读
 const markMessagesAsRead = async (roomId, userId) => {
   try {
-    // 重置当前用户的未读计数
     await ChatRoom.findOneAndUpdate(
       { 
         _id: roomId,
@@ -158,6 +163,11 @@ const markMessagesAsRead = async (roomId, userId) => {
         $set: { 'participants.$.unreadCount': 0 }
       }
     );
+
+    // 在需要使用时获取 io 实例
+    const io = socketIO.getIO();
+    io.to(roomId).emit('messages_read', { roomId, userId });
+    
   } catch (error) {
     throw new Error(`Failed to mark messages as read: ${error.message}`);
   }

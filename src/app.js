@@ -15,8 +15,15 @@ const redisClient = redis.createClient();
 redisClient.on("error", (err) => console.error(`Redis error:${err}`));
 redisClient.on("connect", () => console.log("Connected to Redis"));
 redisClient.connect(); // v4 redis should connect
-
+const http = require('http');
 const app = express();
+const server = http.createServer(app);
+
+// 初始化 socket.io
+const socketIO = require('./socket');
+const io = socketIO.init(server);  // 获取 io 实例并保存
+
+
 const PORT = process.env.PORT || 4001;
 
 connectDB();
@@ -65,6 +72,28 @@ app.use("/posts", postRoutes);
 app.use("/orders", orderRoutes);
 app.use("/chat", chatRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Socket连接处理
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  // 加入聊天室
+  socket.on('join_room', (roomId) => {
+    socket.join(roomId);
+    console.log(`User ${socket.id} joined room ${roomId}`);
+  });
+
+  // 离开聊天室
+  socket.on('leave_room', (roomId) => {
+    socket.leave(roomId);
+    console.log(`User ${socket.id} left room ${roomId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// 使用PORT变量来监听
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
