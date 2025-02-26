@@ -104,6 +104,7 @@ io.on('connection', (socket) => {
       // 找到接收者ID (不是发送者的那个参与者)
       const receiver = chatRoom.participants.find(p => p._id.toString() !== senderId);
       const receiverId = receiver ? receiver._id.toString() : null;
+      if(!receiverId) return;
       
       // 检查接收者是否在线
       const receiverOnline = Array.from(userRooms.values())
