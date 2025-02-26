@@ -14,7 +14,7 @@ const getChatRooms = async (userId) => {
       select: 'content createdAt senderId messageType postId'
     })
     .sort({ 'lastMessage.createdAt': -1 });
-    console.log(`rooms is ${JSON.stringify(rooms)}`)
+    // console.log(`rooms is ${JSON.stringify(rooms)}`)
     return rooms;
   } catch (error) {
     throw new Error(`Failed to get chat rooms: ${error.message}`);
