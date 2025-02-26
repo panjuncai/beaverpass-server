@@ -1,18 +1,5 @@
 const chatService = require('../services/chatService');
 
-const getChatRooms = async (req, res) => {
-  try {
-    const rooms = await chatService.getChatRooms(req.user._id);
-    res.status(200).json({
-      code: 0,
-      msg: "Get chat rooms successfully",
-      data: rooms
-    });
-  } catch (error) {
-    res.status(400).json({ code: 1, msg: error.message });
-  }
-};
-
 const getChatMessages = async (req, res) => {
   try {
     const { roomId } = req.params;

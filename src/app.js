@@ -76,19 +76,99 @@ app.use("/chat", chatRoutes);
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
+  // 存储用户在线状态的Map
+  const userRooms = new Map();
+
   // 加入聊天室
-  socket.on('join_room', (roomId) => {
+  socket.on('join_room', ({ roomId, userId }) => {
     socket.join(roomId);
-    console.log(`User ${socket.id} joined room ${roomId}`);
+    userRooms.set(socket.id, { roomId, userId });
+    
+    // 通知房间内其他用户该用户上线
+    io.to(roomId).emit('user_status', {
+      userId,
+      roomId,
+      status: 'online'
+    });
+    
+    console.log(`User ${userId} joined room ${roomId}`);
+  });
+
+  // 处理发送消息
+  socket.on('send_message', async ({ roomId, message, senderId }) => {
+    try {
+      // 查找聊天室以获取接收者ID
+      const chatRoom = await ChatRoom.findById(roomId);
+      if (!chatRoom) return;
+      
+      // 找到接收者ID (不是发送者的那个参与者)
+      const receiver = chatRoom.participants.find(p => p._id.toString() !== senderId);
+      const receiverId = receiver ? receiver._id.toString() : null;
+      
+      // 检查接收者是否在线
+      const receiverOnline = Array.from(userRooms.values())
+        .some(user => user.roomId === roomId && user.userId === receiverId);
+
+      // 广播消息给房间内所有用户，包含发送者和接收者ID
+      io.to(roomId).emit('new_message', {
+        message,
+        receiverOnline,
+        senderId,
+        receiverId
+      });
+    } catch (error) {
+      console.error('Error in send_message handler:', error);
+    }
+  });
+
+  // 处理消息已读
+  socket.on('mark_read', async ({ roomId, userId }) => {
+    try {
+      // 更新数据库中的已读状态
+      await ChatRoom.findOneAndUpdate(
+        { 
+          _id: roomId,
+          'participants._id': userId 
+        },
+        {
+          $set: { 'participants.$.unreadCount': 0 }
+        }
+      );
+      
+      // 通知房间内所有用户消息已读
+      io.to(roomId).emit('messages_read', { roomId, userId });
+    } catch (error) {
+      console.error('Error in mark_read handler:', error);
+    }
   });
 
   // 离开聊天室
-  socket.on('leave_room', (roomId) => {
+  socket.on('leave_room', ({ roomId, userId }) => {
     socket.leave(roomId);
-    console.log(`User ${socket.id} left room ${roomId}`);
+    userRooms.delete(socket.id);
+    
+    // 通知房间内其他用户该用户离线
+    io.to(roomId).emit('user_status', {
+      userId,
+      roomId,
+      status: 'offline'
+    });
+    
+    console.log(`User ${userId} left room ${roomId}`);
   });
 
   socket.on('disconnect', () => {
+    const userData = userRooms.get(socket.id);
+    if (userData) {
+      const { roomId, userId } = userData;
+      // 通知房间内其他用户该用户离线
+      io.to(roomId).emit('user_status', {
+        userId,
+        roomId,
+        status: 'offline'
+      });
+      userRooms.delete(socket.id);
+    }
     console.log('User disconnected:', socket.id);
   });
 });

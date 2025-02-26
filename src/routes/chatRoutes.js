@@ -6,9 +6,6 @@ const auth = require('../middlewares/authMiddleware');
 // 所有聊天相关的路由都需要登录
 router.use(auth);
 
-// 获取聊天室列表
-router.get('/rooms', chatController.getChatRooms);
-
 // 获取与特定用户的聊天室
 router.get('/rooms/user/:userId', chatController.getRoomWithUser);
 
