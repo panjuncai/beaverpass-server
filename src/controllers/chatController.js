@@ -78,7 +78,6 @@ const getRoomWithUser = async (req, res) => {
 };
 
 module.exports = {
-  getChatRooms,
   getChatMessages,
   sendMessage,
   createChatRoom,
