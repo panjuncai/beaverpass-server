@@ -18,6 +18,7 @@ redisClient.connect(); // v4 redis should connect
 const http = require('http');
 const app = express();
 const server = http.createServer(app);
+const ChatRoom = require('./models/ChatRoom');
 
 // 初始化 socket.io
 const socketIO = require('./socket');
@@ -135,7 +136,18 @@ io.on('connection', (socket) => {
           $set: { 'participants.$.unreadCount': 0 }
         }
       );
+      const Message = require('./models/Message');
       
+      // 标记该房间内所有未读消息为已读
+      await Message.updateMany(
+        {
+          roomId,
+          senderId: { $ne: userId },
+          readBy: { $ne: userId }
+        },
+        {$addToSet: { readBy: userId }
+      }
+    );
       // 通知房间内所有用户消息已读
       io.to(roomId).emit('messages_read', { roomId, userId });
     } catch (error) {

@@ -82,13 +82,13 @@ const sendMessage = async (roomId, senderId, { content, postId, messageType = 't
 
     const message = await Message.create(messageData);
     
-    // 创建消息后通过Socket.IO发送到房间
-    const populatedMessage = await Message.findById(message._id)
-      .populate('senderId', 'firstName lastName avatar');
+    // // 创建消息后通过Socket.IO发送到房间
+    // const populatedMessage = await Message.findById(message._id)
+    //   .populate('senderId', 'firstName lastName avatar');
     
-    // 在需要使用时获取 io 实例
-    const io = socketIO.getIO();
-    io.to(roomId).emit('new_message', populatedMessage);
+    // // 在需要使用时获取 io 实例
+    // const io = socketIO.getIO();
+    // io.to(roomId).emit('new_message', populatedMessage);
 
     // 更新聊天室
     await ChatRoom.findByIdAndUpdate(roomId, {
@@ -163,6 +163,16 @@ const markMessagesAsRead = async (roomId, userId) => {
         $set: { 'participants.$.unreadCount': 0 }
       }
     );
+
+    // 标记该房间内所有未读消息为已读
+    await Message.updateMany(
+      {
+        roomId,
+        senderId: { $ne: userId },
+        readBy: { $ne: userId }
+      },
+      {$addToSet: { readBy: userId }
+    })
 
     // 在需要使用时获取 io 实例
     const io = socketIO.getIO();
