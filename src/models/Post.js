@@ -49,7 +49,7 @@ const postSchema = new mongoose.Schema({
       default: false
     }
   },
-  delivery: {
+  deliveryType: {
     type: String,
     required: true,
     enum: ["Home Delivery", "Pickup", "Both"]
