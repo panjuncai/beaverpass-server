@@ -89,11 +89,25 @@ const getRoomWithUser = async (req, res) => {
   }
 };
 
+const getUnreadCount = async (req, res) => {
+  try {
+    const result = await chatService.getTotalUnreadCount(req.user._id);
+    res.status(200).json({
+      code: 0,
+      msg: "get unread count successfully",
+      data: result
+    });
+  } catch (error) {
+    res.status(200).json({ code: 1, msg: error.message });
+  }
+};
+
 module.exports = {
   getChatRooms,
   getChatMessages,
   sendMessage,
   createChatRoom,
   markAsRead,
-  getRoomWithUser
+  getRoomWithUser,
+  getUnreadCount
 }; 

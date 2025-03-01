@@ -205,11 +205,39 @@ const findRoomWithUser = async (userId, sellerId) => {
   }
 };
 
+const getTotalUnreadCount = async (userId) => {
+  try {
+    // 查找用户参与的所有聊天室
+    const rooms = await ChatRoom.find({ 
+      'participants._id': userId 
+    });
+    
+    // 计算总未读消息数
+    let totalUnread = 0;
+    
+    for (const room of rooms) {
+      // 找到当前用户在该聊天室中的记录
+      const userParticipant = room.participants.find(
+        p => p._id.toString() === userId.toString()
+      );
+      
+      if (userParticipant && userParticipant.unreadCount) {
+        totalUnread += userParticipant.unreadCount;
+      }
+    }
+    
+    return  totalUnread ;
+  } catch (error) {
+    throw new Error(`获取未读消息数失败: ${error.message}`);
+  }
+};
+
 module.exports = {
   getChatRooms,
   getChatMessages,
   sendMessage,
   createChatRoom,
   markMessagesAsRead,
-  findRoomWithUser
+  findRoomWithUser,
+  getTotalUnreadCount
 }; 
