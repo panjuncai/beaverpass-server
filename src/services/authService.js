@@ -1,9 +1,8 @@
 const nodemailer = require("nodemailer");
-const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
-const dotenv = require("dotenv");
 require("../config/env")();
+const crypto = require('crypto');
 
 const registerUser = async ({ email, password, firstName, lastName }) => {
   try {
@@ -23,19 +22,15 @@ const registerUser = async ({ email, password, firstName, lastName }) => {
     
     await user.save();
 
-    // verify token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.SECRET_KEY_VERIFY,
-      {
-        expiresIn: "1d",
-      }
-    );
+    // 生成验证token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = verificationToken;
+    await user.save();
 
-    // verify mail link
-    const verifyLink = `${process.env.BASE_URI}/verifyEmail?token=${token}`;
+    // 验证邮件链接
+    const verifyLink = `${process.env.BASE_URI}/verifyEmail?token=${verificationToken}`;
 
-    // config nodemailer
+    // 配置邮件发送
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
@@ -81,11 +76,11 @@ const loginUser = async ({ email, password }) => {
   }
 };
 
-const verifyUser = async (userId) => {
+const verifyUser = async (token) => {
   try {
-    const user = await User.findById(userId);
+    const user = await User.findOne({ verificationToken: token });
     if (!user) {
-      throw new Error("User is not exists");
+      throw new Error("Invalid verification link");
     }
 
     if (user.isVerified) {
@@ -93,12 +88,12 @@ const verifyUser = async (userId) => {
     }
 
     user.isVerified = true;
+    user.verificationToken = undefined;
     await user.save();
     return user;
   } catch (e) {
     throw e;
   }
 };
-
 
 module.exports = { registerUser, loginUser, verifyUser };

@@ -49,15 +49,18 @@ app.use(
   session({
     store: new RedisStore({
       client: redisClient,
+      prefix: "beaverpass:", // Redis key 前缀，避免冲突
     }),
-    secret: process.env.SECRET_KEY_JWT,
-    resave: false,
-    saveUninitialized: false,
+    name: 'sessionId', // 自定义 cookie 名称，增加安全性
+    secret: process.env.SESSION_SECRET, // 使用专门的 session secret
+    resave: false, // 如果 session 没有修改，不重新保存
+    saveUninitialized: false, // 不保存未初始化的 session
+    rolling: true, // 每次请求都刷新 cookie 过期时间
     cookie: {
-      httpOnly: true, // prevent client access cookie
-      // secure:process.env.NODE_ENV==='production',//必须开启 https才能设置
-      maxAge: 1000*60*60*24*14 // 14 days
-      // maxAge: 1000*60*2 // 2min
+      httpOnly: true, // 防止客户端 JS 访问 cookie
+      // secure: process.env.NODE_ENV === 'production', // 生产环境强制使用 HTTPS
+      sameSite: 'lax', // 防止 CSRF 攻击
+      maxAge: 1000 * 60 * 60 * 24 //  24h
     },
   })
 );

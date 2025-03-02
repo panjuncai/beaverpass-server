@@ -1,24 +1,14 @@
-const jwt = require("jsonwebtoken");
-const authMiddleware = (req, res, next) => {
-  const token = req.session.jwt;
-  // console.log('JWT from session:',token);
-  if (!token) {
-    return res.status(401).json({ code: 4001, msg: "Unauthorized" });
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      code: 4001,
+      msg: "Not logged in"
+    });
   }
-
-  try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY_JWT);
-    // req.userId = decoded.userId;
-    req.user = decoded.user;
-    // console.log(`req.user is ${JSON.stringify(req.user)}`)
-    next();
-  } catch (e) {
-    if (e.name === "TokenExpiredError") {
-      res.status(403).json({ code: 1, msg: "Token expired" });
-    } else {
-      res.status(403).json({ code: 1, msg: e.message });
-    }
-  }
+  
+  // 将用户信息添加到请求对象中
+  req.user = req.session.user;
+  next();
 };
 
-module.exports = authMiddleware;
+module.exports = auth;
