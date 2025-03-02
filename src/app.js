@@ -8,6 +8,7 @@ const userRoutes=require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 const session = require("express-session");
 const { RedisStore } = require("connect-redis");
 const redis = require("redis");
@@ -72,6 +73,7 @@ app.use("/users",userRoutes)
 app.use("/posts", postRoutes);
 app.use("/orders", orderRoutes);
 app.use("/chat", chatRoutes);
+app.use("/payments", paymentRoutes);
 
 // Socket连接处理
 io.on('connection', (socket) => {

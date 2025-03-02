@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node -r dotenv/config src/app.js",
     "dev": "DOTENV_CONFIG_PATH=.env.development nodemon -r dotenv/config src/app.js",
+    "windev": "cross-env DOTENV_CONFIG_PATH=development nodemon -r dotenv/config src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -23,7 +24,8 @@
     "mongoose": "^8.9.4",
     "nodemailer": "^6.9.16",
     "redis": "^4.7.0",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
