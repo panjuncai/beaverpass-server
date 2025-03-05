@@ -1,14 +1,18 @@
-const mongoose = require("mongoose");
+const supabase = require('../lib/supabase');
 require('./env')();
 
 const connectDB = async () => {
   try {
-    console.log(`Connecting to MongoDB: ${process.env.MONGODB_URI}`);
-    const dbUri = process.env.MONGODB_URI;
-    await mongoose.connect(dbUri);
-    console.log("MongoDB Connected");
+    // 测试 Supabase 连接
+    const { data, error } = await supabase.from('users').select('count').limit(1);
+    
+    if (error) {
+      throw error;
+    }
+    
+    console.log("Supabase 连接成功");
   } catch (e) {
-    console.error("MongoDB connection error:", e);
+    console.error("Supabase 连接错误:", e);
     process.exit(1);
   }
 };
