@@ -1,12 +1,13 @@
-const dotenv = require('dotenv');
+import dotenv from 'dotenv';
 
 const loadEnv = () => {
-  console.log(`Loading env variables...${process.env.NODE_ENV}`);
-  const env = process.env.NODE_ENV || "development";
-
-  dotenv.config({ path: `.env.${env}.local` });
-  dotenv.config({ path: `.env.${env}` });
-  dotenv.config();
+  const result = dotenv.config({
+    path: process.env.DOTENV_CONFIG_PATH || '.env'
+  });
+  
+  if (result.error) {
+    console.warn('Failed to load .env file, using environment variables');
+  }
 };
 
-module.exports = loadEnv;
+export default loadEnv;

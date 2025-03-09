@@ -1,7 +1,7 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const auth = require("../middlewares/authMiddleware");
-const orderController = require("../controllers/orderController");
+import auth from "../middlewares/authMiddleware";
+import orderController from "../controllers/orderController";
 
 // 创建订单
 router.post("/", auth, orderController.createOrder);
@@ -15,4 +15,4 @@ router.get("/:id", auth, orderController.getOrderById);
 // 更新订单状态
 router.patch("/:id/status", auth, orderController.updateOrderStatus);
 
-module.exports = router; 
+export default router; 

@@ -1,56 +1,74 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+import supabase from "../config/supabase.js";
 
-const userSchema = new mongoose.Schema(
-  {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true
-    },
-    firstName: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    lastName: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    avatar: {
-      type: String
-    },
-    address: {
-      type: String
-    },
-    phone: {
-      type: String
-    },
-    password: {
-      type: String,
-      required: true
-    },
-    isVerified: {
-      type: Boolean,
-      default: false
-    },
-    verificationToken: {
-      type: String
+const createUser = async (userData) => {
+    try {
+        const { data, error } = await supabase
+        .from("users")
+        .insert(userData)
+        .select()
+        .single();
+        return {data,error}
+    } catch (error) {
+        console.error(error);
+        return { data: null, error };
     }
-  },
-  { timestamps: true, versionKey: false }
-);
-
-userSchema.methods.toJSON = function () {
-  const user = this.toObject();
-  delete user.password;
-  delete user.verificationToken;
-  return user;
 };
 
-const User = mongoose.model("User", userSchema);
+const verifyUser = async (verifyToken) => {
+    try {
+        const { data, error } = await supabase
+        .from("users")
+        .select()
+        .eq("verification_token", verifyToken)
+        .maybeSingle();
+        return {data,error}
+    } catch (error) {
+        console.error(error);
+        return { data: null, error };
+    }
+};
 
-module.exports = User;
+const getUserByEmail = async (email) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select()
+      .eq("email", email)
+      .maybeSingle();
+    return { data, error };
+  } catch (error) {
+    console.error(error);
+    return { data: null, error };
+  }
+};
+
+const getUserById = async (id) => {
+    try {
+        const { data, error } = await supabase
+        .from("users")
+        .select()
+        .eq("id", id)
+        .maybeSingle();
+        return {data,error}
+    } catch (error) {
+        console.error(error);
+        return { data: null, error };
+    }
+};
+
+const updateUser = async (id, userData) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .update(userData)
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+    return { data, error };
+  } catch (error) {
+    console.error(error);
+    return { data: null, error };
+  }
+};
+
+export { createUser, getUserByEmail, getUserById, updateUser, verifyUser };

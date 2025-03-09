@@ -1,7 +1,7 @@
-const express = require("express");
-const userController = require("../controllers/userController");
-const auth = require("../middlewares/authMiddleware");
-const mongoose = require("mongoose");
+import express from 'express';
+import userController from '../controllers/userController';
+import auth from '../middlewares/authMiddleware';
+import mongoose from 'mongoose';
 const router = express.Router();
 
 // 使用 router.param 针对 id 参数进行预处理和验证
@@ -25,4 +25,4 @@ router.get("/:userId", userController.getUserById);
 // 更新用户信息（需要认证）
 router.patch("/:userId", auth, userController.updateUser);
 
-module.exports = router;
+export default router;

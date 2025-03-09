@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const chatController = require('../controllers/chatController');
-const auth = require('../middlewares/authMiddleware');
+import chatController from '../controllers/chatController';
+import auth from '../middlewares/authMiddleware';
 
 // 所有聊天相关的路由都需要登录
 router.use(auth);
@@ -26,4 +26,4 @@ router.post('/rooms/:roomId/read', auth, chatController.markAsRead);
 // 获取当前用户的未读消息总数
 router.get('/rooms/unread', auth, chatController.getUnreadCount);
 
-module.exports = router; 
+export default router; 

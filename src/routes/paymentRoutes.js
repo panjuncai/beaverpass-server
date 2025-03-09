@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const auth = require('../middlewares/authMiddleware');
-const paymentController = require('../controllers/paymentController');
-require("../config/env")();
+import auth from '../middlewares/authMiddleware';
+import paymentController from '../controllers/paymentController';
+import loadEnv from '../config/env';
+loadEnv();
 
 // 创建支付意向
 router.post('/create-payment-intent', auth, paymentController.createPaymentIntent);
@@ -22,4 +23,4 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
   }
 });
 
-module.exports = router; 
+export default router; 

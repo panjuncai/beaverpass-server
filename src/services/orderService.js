@@ -1,5 +1,5 @@
-const Order = require("../models/Order");
-const Post = require("../models/Post");
+import Order from "../models/Order";
+import Post from "../models/Post";
 
 const createOrder = async (orderData) => {
   try {
@@ -124,7 +124,7 @@ const updateOrderStatus = async (orderId, status, userId) => {
   }
 };
 
-module.exports = {
+export {
   createOrder,
   getOrders,
   getOrderById,

@@ -1,4 +1,4 @@
-const Joi=require('joi')
+import Joi from 'joi';
 
 const registerValidationSchema=Joi.object({
     firstName:Joi.string().min(1).max(20).required().messages({
@@ -59,4 +59,4 @@ const loginValidationSchema=Joi.object({
 const validateLogin=(data)=>{
     return loginValidationSchema.validate(data,{abortEarly:false})
 }
-module.exports={validateRegister,validateLogin}
+export {validateRegister,validateLogin}

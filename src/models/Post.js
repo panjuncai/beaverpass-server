@@ -1,71 +1,173 @@
-const mongoose = require('mongoose');
+import supabase from "../config/supabase.js";
 
-const postSchema = new mongoose.Schema({
-  category: {
-    type: String,
-    required: true,
-    enum: [
-      "Living Room Furniture",
-      "Bedroom Furniture",
-      "Dining Room Furniture",
-      "Office Furniture",
-      "Outdoor Furniture",
-      "Storage",
-      "Other"
-    ]
-  },
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
-    type: String,
-    required: true,
-    maxLength: 500
-  },
-  condition: {
-    type: String,
-    required: true,
-    enum: ["Like New", "Gently Used", "Minor Scratches", "Stains", "Needs Repair"]
-  },
-  images: {
-    FRONT: { type: String, required: true },
-    SIDE: { type: String },
-    BACK: { type: String },
-    DAMAGE: { type: String }
-  },
-  price: {
-    amount: {
-      type: String,
-      required: function() { return !this.price.isFree; }
-    },
-    isFree: {
-      type: Boolean,
-      default: false
-    },
-    isNegotiable: {
-      type: Boolean,
-      default: false
-    }
-  },
-  deliveryType: {
-    type: String,
-    required: true,
-    enum: ["Home Delivery", "Pickup", "Both"]
-  },
-  poster: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  status: {
-    type: String,
-    enum: ['active','inactive', 'sold', 'deleted'],
-    default: 'active'
+const createPost = async (postData) => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .insert(postData)
+      .select(`
+        *,
+        poster:poster_id (
+          id,
+          first_name,
+          last_name,
+          email,
+          avatar
+        )
+      `)
+      .single();
+    return { data, error };
+  } catch (error) {
+    console.error(error);
+    return { data: null, error };
   }
-}, {
-  timestamps: true
-});
+};
 
-module.exports = mongoose.model('Post', postSchema); 
+const getPostsByFilter = async (filter = {}) => {
+  try {
+    // 构建查询
+    let query = supabase
+      .from("posts")
+      .select(`
+      *,
+      poster:poster_id (
+        id,
+        first_name,
+        last_name,
+        email,
+        avatar
+      )
+    `)
+      .neq("status", "deleted")
+      .order("created_at", { ascending: false });
+
+    // 添加过滤条件
+    if (filter.category) {
+      query = query.eq("category", filter.category);
+    }
+
+    if (filter.condition) {
+      query = query.eq("condition", filter.condition);
+    }
+
+    if (filter.status) {
+      query = query.eq("status", filter.status);
+    }
+
+    if (filter.priceRange) {
+      const [min, max] = filter.priceRange.split("-");
+      query = query.gte("price_amount", min).lte("price_amount", max);
+    }
+
+    // 执行查询
+    const { data: posts, error } = await query;
+    return { data: posts, error };
+  } catch (error) {
+    console.error(error);
+    return { data: null, error };
+  }
+};
+
+const getAllPosts = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select(`
+        *,
+        poster:poster_id (
+          id,
+          first_name,
+          last_name,
+          email,
+          avatar
+        )
+      `)
+      .neq("status", "deleted")
+      .order("created_at", { ascending: false });
+    return { data, error };
+  } catch (error) {
+    console.error(error);
+    return { data: null, error };
+  }
+};
+
+const getPostById = async (id) => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select(`
+        *,
+        poster:poster_id (
+          id,
+          first_name,
+          last_name,
+          email,
+          avatar
+        )
+      `)
+      .eq("id", id)
+      .neq("status", "deleted")
+      .single();
+    return { data, error };
+  } catch (error) {
+    console.error(error);
+    return { data: null, error };
+  }
+};
+
+const getPostsByPosterId = async (posterId) => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select(`
+        *,
+        poster:poster_id (
+          id,
+          first_name,
+          last_name,
+          email,
+          avatar
+        )
+      `)
+      .eq("poster_id", posterId)
+      .neq("status", "deleted")
+      .order("created_at", { ascending: false });
+    return { data, error };
+  } catch (error) {
+    console.error(error);
+    return { data: null, error };
+  }
+};
+
+const updatePost = async (id, postData) => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .update(postData)
+      .eq("id", id)
+      .select(`
+        *,
+        poster:poster_id (
+          id,
+          first_name,
+          last_name,
+          email,
+          avatar
+        )
+      `)
+      .single();
+    return { data, error };
+  } catch (error) {
+    console.error(error);
+    return { data: null, error };
+  }
+};
+
+export {
+  createPost,
+  getAllPosts,
+  getPostById,
+  updatePost,
+  getPostsByPosterId,
+  getPostsByFilter,
+};

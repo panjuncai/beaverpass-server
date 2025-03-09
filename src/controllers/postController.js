@@ -1,12 +1,11 @@
-const postService = require("../services/postService");
+import postService from "../services/postService";
 
 const createPost = async (req, res) => {
   try {
     const postData = {
       ...req.body,
-      poster: req.user._id
+      poster: req.user.id
     };
-    console.log(postData);
     const post = await postService.createPost(postData);
     res.status(201).json({ code: 0, msg: "Post created successfully", data: post });
   } catch (e) {
@@ -34,7 +33,7 @@ const getPostById = async (req, res) => {
 
 const updatePostStatus = async (req, res) => {
   try {
-    const post = await postService.updatePostStatus(req.params.id, req.body.status, req.user._id);
+    const post = await postService.updatePostStatus(req.params.id, req.body.status, req.user.id);
     res.status(200).json({ code: 0, msg: "Post status updated", data: post });
   } catch (e) {
     res.status(400).json({ code: 1, msg: e.message });
@@ -44,7 +43,7 @@ const updatePostStatus = async (req, res) => {
 const getMyPosts = async (req, res) => {
   try {
     // req.user 来自 auth 中间件
-    const posts = await postService.getPostsByUserId(req.user._id);
+    const posts = await postService.getPostsByUserId(req.user.id);
     res.status(200).json({
       code: 0,
       msg: "Get my posts successfully",
@@ -58,7 +57,7 @@ const getMyPosts = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createPost,
   getPosts,
   getPostById,

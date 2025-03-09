@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const auth = require('../middlewares/authMiddleware');
-const postController = require('../controllers/postController');
+import auth from '../middlewares/authMiddleware';
+import postController from '../controllers/postController';
 
 // 创建帖子
 router.post('/', auth, postController.createPost);
@@ -20,4 +20,4 @@ router.patch('/:id/status', auth, postController.updatePostStatus);
 
 
 
-module.exports = router; 
+export default router; 

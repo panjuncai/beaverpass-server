@@ -1,5 +1,5 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const Order = require('../models/Order');
+import stripe from 'stripe';
+import Order from '../models/Order';
 
 const createPaymentIntent = async (orderId, userId) => {
   try {
@@ -90,7 +90,7 @@ const handlePaymentFailure = async (paymentIntent) => {
   await order.save();
 };
 
-module.exports = {
+export {
   createPaymentIntent,
   handleStripeWebhook
 }; 

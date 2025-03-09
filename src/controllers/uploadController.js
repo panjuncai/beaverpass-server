@@ -1,4 +1,4 @@
-const s3Utils = require('../utils/s3');
+import s3Utils from '../utils/s3';
 
 /**
  * 生成预签名URL
@@ -54,6 +54,6 @@ const getPresignedUrl = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   getPresignedUrl
 }; 

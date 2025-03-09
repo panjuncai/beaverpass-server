@@ -1,8 +1,8 @@
-const chatService = require('../services/chatService');
+import chatService from '../services/chatService';
 
 const getChatRooms=async(req,res)=>{
   try {
-    const rooms=await chatService.getChatRooms(req.user._id);
+    const rooms=await chatService.getChatRooms(req.user.id);
     res.status(200).json({
       code: 0,
       msg: "Get chat rooms successfully",
@@ -15,7 +15,7 @@ const getChatRooms=async(req,res)=>{
 const getChatMessages = async (req, res) => {
   try {
     const { roomId } = req.params;
-    const messages = await chatService.getChatMessages(roomId, req.user._id);
+    const messages = await chatService.getChatMessages(roomId, req.user.id);
     res.status(200).json({
       code: 0,
       msg: "Get messages successfully",
@@ -31,7 +31,7 @@ const sendMessage = async (req, res) => {
     const { roomId } = req.params;
     const { content, postId, messageType = 'text' } = req.body;
     
-    const message = await chatService.sendMessage(roomId, req.user._id, {
+    const message = await chatService.sendMessage(roomId, req.user.id, {
       content,
       postId,
       messageType
@@ -50,7 +50,7 @@ const sendMessage = async (req, res) => {
 const createChatRoom = async (req, res) => {
   try {
     const {sellerId } = req.body;
-    const room = await chatService.createChatRoom(req.user._id, sellerId);
+    const room = await chatService.createChatRoom(req.user.id, sellerId);
     res.status(200).json({
       code: 0,
       msg: "Chat room created successfully",
@@ -64,7 +64,7 @@ const createChatRoom = async (req, res) => {
 const markAsRead = async (req, res) => {
   try {
     const { roomId } = req.params;
-    await chatService.markMessagesAsRead(roomId, req.user._id);
+    await chatService.markMessagesAsRead(roomId, req.user.id);
     res.status(200).json({
       code: 0,
       msg: "Messages marked as read successfully"
@@ -77,7 +77,7 @@ const markAsRead = async (req, res) => {
 const getRoomWithUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const room = await chatService.findRoomWithUser(req.user._id, userId);
+    const room = await chatService.findRoomWithUser(req.user.id, userId);
     
     res.status(200).json({
       code: 0,
@@ -91,7 +91,7 @@ const getRoomWithUser = async (req, res) => {
 
 const getUnreadCount = async (req, res) => {
   try {
-    const result = await chatService.getTotalUnreadCount(req.user._id);
+    const result = await chatService.getTotalUnreadCount(req.user.id);
     res.status(200).json({
       code: 0,
       msg: "get unread count successfully",
@@ -102,7 +102,7 @@ const getUnreadCount = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   getChatRooms,
   getChatMessages,
   sendMessage,

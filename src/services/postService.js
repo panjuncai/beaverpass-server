@@ -1,4 +1,4 @@
-const supabase = require('../lib/supabase');
+import supabase from '../lib/supabase.js';
 
 const createPost = async (postData) => {
   try {
@@ -14,26 +14,27 @@ const createPost = async (postData) => {
     }
 
     // 处理价格
-    const processedPostData = {
-      ...postData,
-      price: {
-        ...postData.price,
-        amount: postData.price.isFree ? "0" : postData.price.amount
-      }
-    };
+    const priceIsFree = postData.price.isFree || false;
+    const priceAmount = priceIsFree ? 0 : postData.price.amount;
+    const priceIsNegotiable = postData.price.isNegotiable || false;
 
     // 创建帖子
     const { data: post, error } = await supabase
       .from('posts')
       .insert({
-        category: processedPostData.category,
-        title: processedPostData.title,
-        description: processedPostData.description,
-        condition: processedPostData.condition,
-        images: processedPostData.images,
-        price: processedPostData.price,
-        delivery_type: processedPostData.deliveryType,
-        poster_id: processedPostData.poster,
+        category: postData.category,
+        title: postData.title,
+        description: postData.description,
+        condition: postData.condition,
+        image_front: postData.images.FRONT,
+        image_side: postData.images.SIDE || null,
+        image_back: postData.images.BACK || null,
+        image_damage: postData.images.DAMAGE || null,
+        price_amount: priceAmount,
+        price_is_free: priceIsFree,
+        price_is_negotiable: priceIsNegotiable,
+        delivery_type: postData.deliveryType,
+        poster_id: postData.poster,
         status: 'active',
         created_at: new Date(),
         updated_at: new Date()
@@ -41,7 +42,7 @@ const createPost = async (postData) => {
       .select(`
         *,
         poster:poster_id (
-          id,
+          _id,
           first_name,
           last_name,
           email
@@ -53,7 +54,30 @@ const createPost = async (postData) => {
       throw new Error(error.message);
     }
 
-    return post;
+    // 转换返回格式以匹配前端期望的结构
+    const formattedPost = {
+      ...post,
+      images: {
+        FRONT: post.image_front,
+        SIDE: post.image_side,
+        BACK: post.image_back,
+        DAMAGE: post.image_damage
+      },
+      price: {
+        amount: post.price_amount.toString(),
+        isFree: post.price_is_free,
+        isNegotiable: post.price_is_negotiable
+      },
+      deliveryType: post.delivery_type,
+      poster: {
+        _id: post.poster._id,
+        firstName: post.poster.first_name,
+        lastName: post.poster.last_name,
+        email: post.poster.email
+      }
+    };
+
+    return formattedPost;
   } catch (e) {
     throw e;
   }
@@ -69,7 +93,7 @@ const getAllPosts = async (filters) => {
       .select(`
         *,
         poster:poster_id (
-          id,
+          _id,
           first_name,
           last_name
         )
@@ -87,9 +111,7 @@ const getAllPosts = async (filters) => {
     
     if (priceRange) {
       const [min, max] = priceRange.split('-');
-      // 注意：这里需要根据实际存储方式调整
-      // 假设价格存储在 price->amount 字段中
-      query = query.gte('price->amount', min).lte('price->amount', max);
+      query = query.gte('price_amount', min).lte('price_amount', max);
     }
     
     // 执行查询
@@ -103,7 +125,29 @@ const getAllPosts = async (filters) => {
       throw new Error('No posts found');
     }
     
-    return posts;
+    // 转换返回格式以匹配前端期望的结构
+    const formattedPosts = posts.map(post => ({
+      ...post,
+      images: {
+        FRONT: post.image_front,
+        SIDE: post.image_side,
+        BACK: post.image_back,
+        DAMAGE: post.image_damage
+      },
+      price: {
+        amount: post.price_amount.toString(),
+        isFree: post.price_is_free,
+        isNegotiable: post.price_is_negotiable
+      },
+      deliveryType: post.delivery_type,
+      poster: {
+        _id: post.poster._id,
+        firstName: post.poster.first_name,
+        lastName: post.poster.last_name
+      }
+    }));
+    
+    return formattedPosts;
   } catch (e) {
     throw e;
   }
@@ -116,12 +160,12 @@ const getPostById = async (postId) => {
       .select(`
         *,
         poster:poster_id (
-          id,
+          _id,
           first_name,
           last_name
         )
       `)
-      .eq('id', postId)
+      .eq('_id', postId)
       .single();
     
     if (error) {
@@ -132,7 +176,29 @@ const getPostById = async (postId) => {
       throw new Error('Post not found');
     }
     
-    return post;
+    // 转换返回格式以匹配前端期望的结构
+    const formattedPost = {
+      ...post,
+      images: {
+        FRONT: post.image_front,
+        SIDE: post.image_side,
+        BACK: post.image_back,
+        DAMAGE: post.image_damage
+      },
+      price: {
+        amount: post.price_amount.toString(),
+        isFree: post.price_is_free,
+        isNegotiable: post.price_is_negotiable
+      },
+      deliveryType: post.delivery_type,
+      poster: {
+        _id: post.poster._id,
+        firstName: post.poster.first_name,
+        lastName: post.poster.last_name
+      }
+    };
+    
+    return formattedPost;
   } catch (e) {
     throw e;
   }
@@ -144,7 +210,7 @@ const updatePostStatus = async (postId, status, userId) => {
     const { data: post, error: fetchError } = await supabase
       .from('posts')
       .select('poster_id')
-      .eq('id', postId)
+      .eq('_id', postId)
       .single();
     
     if (fetchError || !post) {
@@ -162,7 +228,7 @@ const updatePostStatus = async (postId, status, userId) => {
         status,
         updated_at: new Date()
       })
-      .eq('id', postId)
+      .eq('_id', postId)
       .select()
       .single();
     
@@ -170,7 +236,24 @@ const updatePostStatus = async (postId, status, userId) => {
       throw new Error(updateError.message);
     }
     
-    return updatedPost;
+    // 转换返回格式以匹配前端期望的结构
+    const formattedPost = {
+      ...updatedPost,
+      images: {
+        FRONT: updatedPost.image_front,
+        SIDE: updatedPost.image_side,
+        BACK: updatedPost.image_back,
+        DAMAGE: updatedPost.image_damage
+      },
+      price: {
+        amount: updatedPost.price_amount.toString(),
+        isFree: updatedPost.price_is_free,
+        isNegotiable: updatedPost.price_is_negotiable
+      },
+      deliveryType: updatedPost.delivery_type
+    };
+    
+    return formattedPost;
   } catch (e) {
     throw e;
   }
@@ -189,13 +272,30 @@ const getPostsByUserId = async (userId) => {
       throw new Error(error.message);
     }
     
-    return posts;
+    // 转换返回格式以匹配前端期望的结构
+    const formattedPosts = posts.map(post => ({
+      ...post,
+      images: {
+        FRONT: post.image_front,
+        SIDE: post.image_side,
+        BACK: post.image_back,
+        DAMAGE: post.image_damage
+      },
+      price: {
+        amount: post.price_amount.toString(),
+        isFree: post.price_is_free,
+        isNegotiable: post.price_is_negotiable
+      },
+      deliveryType: post.delivery_type
+    }));
+    
+    return formattedPosts;
   } catch (error) {
     throw new Error(`Failed to get user posts: ${error.message}`);
   }
 };
 
-module.exports = {
+export {
   createPost,
   getAllPosts,
   getPostById,

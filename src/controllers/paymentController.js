@@ -1,9 +1,9 @@
-const paymentService = require('../services/paymentService');
+import paymentService from '../services/paymentService';
 
 const createPaymentIntent = async (req, res) => {
   try {
     const { orderId } = req.body;
-    const paymentIntent = await paymentService.createPaymentIntent(orderId, req.user._id);
+    const paymentIntent = await paymentService.createPaymentIntent(orderId, req.user.id);
     
     res.status(200).json({
       code: 0,
@@ -21,6 +21,6 @@ const createPaymentIntent = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createPaymentIntent
 }; 
