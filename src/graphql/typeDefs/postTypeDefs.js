@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-express';
 
-export const postTypeDefs = gql`
+const postTypeDefs = gql`
   # 枚举类型
   enum PostCategory {
     Living_Room_Furniture
@@ -154,3 +154,4 @@ export const postTypeDefs = gql`
     deletePost(id: ID!): PostRsp!
   }
 `;
+export default postTypeDefs;

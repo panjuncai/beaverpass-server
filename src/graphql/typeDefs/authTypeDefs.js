@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-express';
 
-export const authTypeDefs = gql`
+const authTypeDefs = gql`
   type User {
     id: ID!
     email: String!
@@ -48,3 +48,4 @@ export const authTypeDefs = gql`
   }
 `;
 
+export default authTypeDefs;

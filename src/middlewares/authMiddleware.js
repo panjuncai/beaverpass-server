@@ -2,7 +2,9 @@
 const operationsWithoutAuth = ['Login','Register','VerifyUser','CheckSession','Logout'];
 const auth = (req, res, next) => {
   // console.log(`req.body:${JSON.stringify(req.body)}`);
-  console.log(`req.body:${JSON.stringify(req.body,null,2)}`);
+  if(req.body.operationName!=='CheckSession'){
+    console.log(`req.body:${JSON.stringify(req.body,null,2)}`);
+  }
   if(req.body&&req.body.operationName&&operationsWithoutAuth.includes(req.body.operationName)){
     return next();
   }

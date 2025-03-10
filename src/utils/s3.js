@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import loadEnv from "../config/env";
+import loadEnv from '../config/env.js';
+// 确保环境变量已加载
 loadEnv();
 
 // 创建 S3 客户端，指定区域及凭证
@@ -41,6 +42,4 @@ const generatePresignedUrl = async (fileName, fileType) => {
   }
 };
 
-export {
-  generatePresignedUrl
-};
+export default generatePresignedUrl;
