@@ -22,7 +22,17 @@ const formatPost = (post) => {
       isNegotiable: post.price_is_negotiable
     },
     deliveryType: post.delivery_type,
-    poster: post.poster,
+    poster: {
+      id: post.poster.id,
+      firstName: post.poster.first_name,
+      lastName: post.poster.last_name,
+      avatar: post.poster.avatar,
+      email: post.poster.email,
+      phone: post.poster.phone,
+      address: post.poster.address,
+      createdAt: post.poster.created_at,
+      updatedAt: post.poster.updated_at
+    },
     status: post.status,
     createdAt: post.created_at,
     updatedAt: post.updated_at
@@ -107,7 +117,7 @@ const postResolvers = {
         
         // 格式化帖子数据
         const formattedPosts = posts.map(post => formatPost(post));
-        
+        // console.log('formattedPosts', formattedPosts);
         return {
           code: 0,
           msg: "获取帖子成功",
