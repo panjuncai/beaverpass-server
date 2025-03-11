@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 已有的用户模型（假设）
+model User {
+  id            String   @id @default(uuid())
+  // 其他用户字段
+  // ...
+
+  // 关系字段
+  buyerOrders   Order[]  @relation("BuyerOrders")
+  sellerOrders  Order[]  @relation("SellerOrders")
+}
+
+// 已有的帖子模型（假设）
+model Post {
+  id            String   @id @default(uuid())
+  // 其他帖子字段
+  // ...
+
+  // 关系字段
+  orders        Order[]
+}
+
+// 订单状态枚举
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELED
+  REFUNDED
+}
+
+// 订单模型
+model Order {
+  id                    String      @id @default(uuid())
+  
+  // 用户关联
+  buyerId               String
+  buyer                 User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId              String
+  seller                User        @relation("SellerOrders", fields: [sellerId], references: [id])
+
+  // 商品快照
+  postId                String
+  post                  Post        @relation(fields: [postId], references: [id])
+  title                 String
+  price                 Decimal     @db.Decimal(12, 2)
+  imageFront            String
+  imageBack             String?
+  imageLeft             String?
+  imageRight            String?
+
+  // 收货信息
+  shippingAddress       String
+  shippingReceiver      String
+  shippingPhone         String
+
+  // 支付信息
+  paymentMethod         String
+  paymentTransactionId  String?
+
+  // 金额计算相关
+  paymentFee            Decimal     @default(0) @db.Decimal(12, 2)
+  deliveryFee           Decimal     @default(0) @db.Decimal(12, 2)
+  serviceFee            Decimal     @default(0) @db.Decimal(12, 2)
+  tax                   Decimal     @default(0) @db.Decimal(12, 2)
+  total                 Decimal     @db.Decimal(12, 2)
+
+  // 订单状态
+  status                OrderStatus @default(PENDING_PAYMENT)
+
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @default(now()) @updatedAt @map("updated_at")
+
+  @@map("orders")
+} 

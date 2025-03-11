@@ -12,7 +12,7 @@ import cors from "cors";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
 // 自定义核心模块
-import server from "./graphql/index.js";
+import { setupApolloServer } from "./graphql/index.js";
 import {connectDB,redisClient} from "./config/db.js";
 import auth from "./middlewares/authMiddleware.js";
 // import setupGraphQL from "./graphql/index.js";
@@ -86,15 +86,15 @@ async function startServer() {
     next();
   });
 
-  // 启动 Apollo Server
-  await server.start();
-
-  // 应用 Apollo Server
-  server.applyMiddleware({ app,cors:false,path:'/graphql' });
+  // 设置 Apollo Server 和 WebSocket 订阅
+  const httpServer = await setupApolloServer(app);
 
   // 使用PORT变量来监听
-  app.listen(PORT, () => {
-    console.log(`服务运行于端口:${PORT}`);
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Server ready at http://localhost:${PORT}`);
+    console.log(`🚀 GraphQL ready at http://localhost:${PORT}/graphql`);
+    // 暂时注释掉订阅相关的日志
+    // console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}/graphql`);
   });
 }
 
