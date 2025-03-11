@@ -8,16 +8,40 @@ const postTypeDefs = gql`
     deleted
   }
 
+  enum PostCategory {
+    Living_Room_Furniture
+    Bedroom_Furniture
+    Dining_Room_Furniture
+    Office_Furniture
+    Outdoor_Furniture
+    Storage
+    Other
+  }
+
+  enum PostCondition {
+    Like_New
+    Gently_Used
+    Minor_Scratches
+    Stains
+    Needs_Repair
+  }
+
+  enum DeliveryType {
+    Home_Delivery
+    Pickup
+    Both
+  }
+
   # 帖子类型
   type Post {
     id: ID!
-    category:String!
+    category: PostCategory!
     title: String!
     description: String!
-    condition: String!
+    condition: PostCondition!
     images: PostImages!
     price: PostPrice!
-    deliveryType: String!
+    deliveryType: DeliveryType!
     poster: User!
     status: PostStatus!
     createdAt: String!
@@ -55,32 +79,32 @@ const postTypeDefs = gql`
 
   # 帖子过滤条件输入
   input PostFilterInput {
-    category: String
-    condition: String
+    category: PostCategory
+    condition: PostCondition
     priceRange: String
-    status: String
+    status: PostStatus
   }
 
   # 创建帖子输入
   input CreatePostInput {
-    category: String!
+    category: PostCategory!
     title: String! @constraint(maxLength: 100)
     description: String! @constraint(maxLength: 500)
-    condition: String!
+    condition: PostCondition!
     images: PostImagesInput!
     price: PostPriceInput!
-    deliveryType: String!
+    deliveryType: DeliveryType!
   }
 
   # 更新帖子输入
   input UpdatePostInput {
-    category: String
+    category: PostCategory
     title: String @constraint(maxLength: 100)
     description: String @constraint(maxLength: 500)
-    condition: String
+    condition: PostCondition
     images: PostImagesInput
     price: PostPriceInput
-    deliveryType: String
+    deliveryType: DeliveryType
     status: PostStatus
   }
 

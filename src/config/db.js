@@ -3,7 +3,16 @@ import redis from 'redis';
 import loadEnv from './env.js';
 loadEnv();
 
+// 检查是否使用 Prisma
+const USE_PRISMA = process.env.USE_PRISMA === 'true';
+
 const connectSupabase = async () => {
+  // 如果使用 Prisma，则跳过 Supabase 连接测试
+  if (USE_PRISMA) {
+    console.log("使用 Prisma 模式，跳过 Supabase 连接测试");
+    return;
+  }
+  
   try {
     // 测试 Supabase 连接
     const { data, error } = await supabase.from('users').select('count').limit(1);

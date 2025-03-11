@@ -1,4 +1,43 @@
-import { getPostsByFilter, getPostById, createPost, updatePost, getPostsByPosterId } from '../../models/Post.js';
+import { 
+  getPostsByFilter, 
+  getPostById, 
+  createPost, 
+  updatePost, 
+  getPostsByPosterId,
+  // 添加 Prisma 方法
+  getPostsByFilterWithPrisma,
+  createPostWithPrisma
+} from '../../models/Post.js';
+import loadEnv from '../../config/env.js';
+import { categoryMap, conditionMap, deliveryTypeMap } from './index.js';
+
+loadEnv();
+// 是否使用 Prisma（可以通过环境变量控制）
+const USE_PRISMA = process.env.USE_PRISMA === 'true';
+
+// 处理枚举值映射
+const mapEnumValues = (input) => {
+  if (!input) return input;
+  
+  const result = { ...input };
+  
+  // 处理 category
+  if (input.category && categoryMap[input.category]) {
+    result.category = categoryMap[input.category];
+  }
+  
+  // 处理 condition
+  if (input.condition && conditionMap[input.condition]) {
+    result.condition = conditionMap[input.condition];
+  }
+  
+  // 处理 deliveryType
+  if (input.deliveryType && deliveryTypeMap[input.deliveryType]) {
+    result.deliveryType = deliveryTypeMap[input.deliveryType];
+  }
+  
+  return result;
+};
 
 // 格式化帖子数据（从数据库格式转换为GraphQL格式）
 const formatPost = (post) => {
@@ -110,14 +149,21 @@ const postResolvers = {
     // 获取所有帖子（支持过滤）
     getPostsByFilter: async (_, { filter = {} }) => {
       try {
-        const { data: posts, error } = await getPostsByFilter(filter);
+        // 处理枚举值映射
+        const mappedFilter = mapEnumValues(filter);
+        
+        // 根据配置选择使用 Prisma 或 Supabase
+        const { data: posts, error } = USE_PRISMA 
+          ? await getPostsByFilterWithPrisma(mappedFilter)
+          : await getPostsByFilter(mappedFilter);
+          
         if (error) {
           throw new Error(error.message);
         }
         
         // 格式化帖子数据
         const formattedPosts = posts.map(post => formatPost(post));
-        // console.log('formattedPosts', formattedPosts);
+        console.log('formattedPosts', formattedPosts);
         return {
           code: 0,
           msg: "获取帖子成功",
@@ -232,16 +278,21 @@ const postResolvers = {
           throw new Error(`Validation failed: ${validationErrors.join('; ')}`);
         }
         
+        // 处理枚举值映射
+        const mappedInput = mapEnumValues(input);
+        
         // 格式化帖子数据
-        const postData = formatPostInput(input);
+        const postData = formatPostInput(mappedInput);
         
         // 添加发布者ID和创建时间
         postData.poster_id = req.session.user.id;
         postData.created_at = new Date();
         postData.status = 'active';
         
-        // 创建帖子
-        const { data: post, error } = await createPost(postData);
+        // 根据配置选择使用 Prisma 或 Supabase 创建帖子
+        const { data: post, error } = USE_PRISMA
+          ? await createPostWithPrisma(postData)
+          : await createPost(postData);
         
         if (error) {
           throw new Error(error.message);
@@ -285,33 +336,36 @@ const postResolvers = {
           throw new Error('Deleted posts cannot be updated');
         }
         
+        // 处理枚举值映射
+        const mappedInput = mapEnumValues(input);
+        
         // 格式化更新数据
         const updateData = {};
         
-        if (input.category) updateData.category = input.category;
-        if (input.title) updateData.title = input.title;
-        if (input.description) updateData.description = input.description;
-        if (input.condition) updateData.condition = input.condition;
-        if (input.deliveryType) updateData.delivery_type = input.deliveryType;
-        if (input.status) updateData.status = input.status;
+        if (mappedInput.category) updateData.category = mappedInput.category;
+        if (mappedInput.title) updateData.title = mappedInput.title;
+        if (mappedInput.description) updateData.description = mappedInput.description;
+        if (mappedInput.condition) updateData.condition = mappedInput.condition;
+        if (mappedInput.deliveryType) updateData.delivery_type = mappedInput.deliveryType;
+        if (mappedInput.status) updateData.status = mappedInput.status;
         
         // 处理图片
-        if (input.images) {
-          if (input.images.FRONT) updateData.image_front = input.images.FRONT;
-          if ('SIDE' in input.images) updateData.image_side = input.images.SIDE;
-          if ('BACK' in input.images) updateData.image_back = input.images.BACK;
-          if ('DAMAGE' in input.images) updateData.image_damage = input.images.DAMAGE;
+        if (mappedInput.images) {
+          if (mappedInput.images.FRONT) updateData.image_front = mappedInput.images.FRONT;
+          if ('SIDE' in mappedInput.images) updateData.image_side = mappedInput.images.SIDE;
+          if ('BACK' in mappedInput.images) updateData.image_back = mappedInput.images.BACK;
+          if ('DAMAGE' in mappedInput.images) updateData.image_damage = mappedInput.images.DAMAGE;
         }
         
         // 处理价格
-        if (input.price) {
-          if ('isFree' in input.price) updateData.price_is_free = input.price.isFree;
-          if ('isNegotiable' in input.price) updateData.price_is_negotiable = input.price.isNegotiable;
+        if (mappedInput.price) {
+          if ('isFree' in mappedInput.price) updateData.price_is_free = mappedInput.price.isFree;
+          if ('isNegotiable' in mappedInput.price) updateData.price_is_negotiable = mappedInput.price.isNegotiable;
           
-          if (input.price.isFree) {
+          if (mappedInput.price.isFree) {
             updateData.price_amount = 0;
-          } else if (input.price.amount) {
-            updateData.price_amount = input.price.amount;
+          } else if (mappedInput.price.amount) {
+            updateData.price_amount = mappedInput.price.amount;
           }
         }
         

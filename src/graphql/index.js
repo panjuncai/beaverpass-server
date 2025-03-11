@@ -46,9 +46,25 @@ const server = new ApolloServer({
       // ... other context values ...
     };
   },
-  // 暂时注释掉订阅插件
-  /*
   plugins: [
+    // 添加调试插件，记录所有请求和响应
+    {
+      async requestDidStart(requestContext) {
+        console.log('请求开始:', {
+          query: requestContext.request.query,
+          variables: requestContext.request.variables,
+          operationName: requestContext.request.operationName,
+        });
+        
+        return {
+          async willSendResponse(responseContext) {
+            console.log('响应数据:', JSON.stringify(responseContext.response, null, 2));
+          }
+        };
+      }
+    },
+    // 暂时注释掉订阅插件
+    /*
     // 订阅插件
     {
       async serverWillStart() {
@@ -60,8 +76,8 @@ const server = new ApolloServer({
         };
       }
     }
+    */
   ],
-  */
   // formatError: (error) => {
   //   // 自定义错误格式
   //   console.error('GraphQL Error:', error);

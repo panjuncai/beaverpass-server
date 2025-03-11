@@ -1,87 +1,180 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// 已有的用户模型（假设）
 model User {
-  id            String   @id @default(uuid())
-  // 其他用户字段
-  // ...
+  id                             String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                          String                @unique
+  firstName                      String                @map("first_name")
+  lastName                       String                @map("last_name")
+  avatar                         String?
+  address                        String?
+  phone                          String?
+  password                       String
+  isVerified                     Boolean?              @default(false) @map("is_verified")
+  verificationToken              String?               @map("verification_token")
+  createdAt                      DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                      DateTime?             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  chatRooms                      ChatRoomParticipant[]
+  readMessages                   MessageReadBy[]
+  sentMessages                   Message[]             @relation("SentMessages")
+  orders_orders_buyer_idTousers  orders[]              @relation("orders_buyer_idTousers")
+  orders_orders_seller_idTousers orders[]              @relation("orders_seller_idTousers")
+  posts                          Post[]
 
-  // 关系字段
-  buyerOrders   Order[]  @relation("BuyerOrders")
-  sellerOrders  Order[]  @relation("SellerOrders")
+  @@map("users")
 }
 
-// 已有的帖子模型（假设）
 model Post {
-  id            String   @id @default(uuid())
-  // 其他帖子字段
-  // ...
+  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  category          post_category_enum
+  title             String
+  description       String
+  condition         post_condition_enum
+  imageFront        String              @map("image_front")
+  imageSide         String?             @map("image_side")
+  imageBack         String?             @map("image_back")
+  imageDamage       String?             @map("image_damage")
+  priceAmount       Decimal?            @map("price_amount") @db.Decimal
+  priceIsFree       Boolean?            @default(false) @map("price_is_free")
+  priceIsNegotiable Boolean?            @default(false) @map("price_is_negotiable")
+  deliveryType      delivery_type_enum  @map("delivery_type")
+  posterId          String?             @map("poster_id") @db.Uuid
+  status            post_status_enum?   @default(active)
+  createdAt         DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  messages          Message[]
+  orders            orders[]
+  poster            User?               @relation(fields: [posterId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  // 关系字段
-  orders        Order[]
+  @@map("posts")
 }
 
-// 订单状态枚举
-enum OrderStatus {
-  PENDING_PAYMENT
-  PAID
-  SHIPPED
-  COMPLETED
-  CANCELED
-  REFUNDED
+model ChatRoom {
+  id           String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  createdAt    DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
+  participants ChatRoomParticipant[]
+  messages     Message[]
+
+  @@map("chat_rooms")
 }
 
-// 订单模型
-model Order {
-  id                    String      @id @default(uuid())
-  
-  // 用户关联
-  buyerId               String
-  buyer                 User        @relation("BuyerOrders", fields: [buyerId], references: [id])
-  sellerId              String
-  seller                User        @relation("SellerOrders", fields: [sellerId], references: [id])
+model ChatRoomParticipant {
+  chatRoomId  String   @map("chat_room_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  unreadCount Int?     @default(0) @map("unread_count")
+  chatRoom    ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  // 商品快照
-  postId                String
-  post                  Post        @relation(fields: [postId], references: [id])
-  title                 String
-  price                 Decimal     @db.Decimal(12, 2)
-  imageFront            String
-  imageBack             String?
-  imageLeft             String?
-  imageRight            String?
+  @@id([chatRoomId, userId])
+  @@map("chat_room_participants")
+}
 
-  // 收货信息
-  shippingAddress       String
-  shippingReceiver      String
-  shippingPhone         String
+model Message {
+  id          String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  roomId      String?            @map("room_id") @db.Uuid
+  senderId    String?            @map("sender_id") @db.Uuid
+  content     String?
+  postId      String?            @map("post_id") @db.Uuid
+  messageType message_type_enum? @default(text) @map("message_type")
+  createdAt   DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  readBy      MessageReadBy[]
+  post        Post?              @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  room        ChatRoom?          @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sender      User?              @relation("SentMessages", fields: [senderId], references: [id], onUpdate: NoAction)
 
-  // 支付信息
-  paymentMethod         String
-  paymentTransactionId  String?
+  @@map("messages")
+}
 
-  // 金额计算相关
-  paymentFee            Decimal     @default(0) @db.Decimal(12, 2)
-  deliveryFee           Decimal     @default(0) @db.Decimal(12, 2)
-  serviceFee            Decimal     @default(0) @db.Decimal(12, 2)
-  tax                   Decimal     @default(0) @db.Decimal(12, 2)
-  total                 Decimal     @db.Decimal(12, 2)
+model MessageReadBy {
+  messageId String    @map("message_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  readAt    DateTime? @default(now()) @map("read_at") @db.Timestamptz(6)
+  message   Message   @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  // 订单状态
-  status                OrderStatus @default(PENDING_PAYMENT)
+  @@id([messageId, userId])
+  @@map("message_read_by")
+}
 
-  createdAt             DateTime    @default(now()) @map("created_at")
-  updatedAt             DateTime    @default(now()) @updatedAt @map("updated_at")
+model orders {
+  id                            String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  buyer_id                      String             @db.Uuid
+  seller_id                     String             @db.Uuid
+  post_id                       String             @db.Uuid
+  title                         String
+  price                         Decimal            @db.Decimal(12, 2)
+  image_front                   String
+  image_back                    String?
+  image_left                    String?
+  image_right                   String?
+  shipping_address              String
+  shipping_receiver             String
+  shipping_phone                String
+  payment_method                String
+  payment_transaction_id        String?
+  payment_fee                   Decimal?           @default(0) @db.Decimal(12, 2)
+  delivery_fee                  Decimal?           @default(0) @db.Decimal(12, 2)
+  service_fee                   Decimal?           @default(0) @db.Decimal(12, 2)
+  tax                           Decimal?           @default(0) @db.Decimal(12, 2)
+  total                         Decimal            @db.Decimal(12, 2)
+  status                        order_status_enum? @default(pending_payment)
+  created_at                    DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime?          @default(now()) @db.Timestamptz(6)
+  users_orders_buyer_idTousers  User               @relation("orders_buyer_idTousers", fields: [buyer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  posts                         Post               @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_orders_seller_idTousers User               @relation("orders_seller_idTousers", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
 
-  @@map("orders")
-} 
+enum delivery_type_enum {
+  Home_Delivery @map("Home Delivery")
+  Pickup
+  Both
+}
+
+enum message_type_enum {
+  text
+  image
+  post
+}
+
+enum order_status_enum {
+  pending_payment
+  paid
+  shipped
+  completed
+  canceled
+  refunded
+}
+
+enum post_category_enum {
+  Living_Room_Furniture @map("Living Room Furniture")
+  Bedroom_Furniture     @map("Bedroom Furniture")
+  Dining_Room_Furniture @map("Dining Room Furniture")
+  Office_Furniture      @map("Office Furniture")
+  Outdoor_Furniture     @map("Outdoor Furniture")
+  Storage
+  Other
+}
+
+enum post_condition_enum {
+  Like_New        @map("Like New")
+  Gently_Used     @map("Gently Used")
+  Minor_Scratches @map("Minor Scratches")
+  Stains
+  Needs_Repair    @map("Needs Repair")
+}
+
+enum post_status_enum {
+  active
+  inactive
+  sold
+  deleted
+}

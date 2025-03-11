@@ -1,0 +1,7 @@
+{
+  "email": "test_user@example.com",
+  "password": "Password123!",
+  "userId": "a527db21-538a-4c56-97bc-2ba0bed05964",
+  "verificationToken": "699391e9d3c9680120475061a4ea5e71dc02f3b6b731a47c9604f1175beef577",
+  "isVerified": false
+} 

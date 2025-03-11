@@ -9,7 +9,7 @@ const uploadTypes = gql`
 
   # 扩展现有的Query类型
   extend type Query {
-    # 占位符查询，GraphQL要求至少有一个查询
+    # 占位符查询,GraphQL要求至少有一个查询
     _uploadPlaceholder: String
   }
 
