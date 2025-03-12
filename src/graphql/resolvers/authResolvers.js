@@ -4,6 +4,7 @@ import {
   getUserByEmail,
   updateUser,
   verifyUser,
+  getUserByEmailWithPrisma,
 } from "../../models/User.js";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
@@ -154,7 +155,7 @@ const authResolvers = {
     // 登录
     login: async (_, { input }, { req }) => {
       try {
-        const { data: user, error: getUserError } = await getUserByEmail(input.email);
+        const { data: user, error: getUserError } = await getUserByEmailWithPrisma(input.email);
         if (getUserError) throw new Error(getUserError.message);
         if (!user) throw new Error("User not found");
 

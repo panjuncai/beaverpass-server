@@ -10,7 +10,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "check-env": "node src/scripts/checkEnv.js",
+    "setup-env": "node src/scripts/setupEnv.js",
+    "prestart": "npm run check-env",
+    "predev": "npm run check-env"
   },
   "keywords": [],
   "type": "module",

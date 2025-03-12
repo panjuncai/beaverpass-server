@@ -2,6 +2,8 @@
 import loadEnv from "./config/env.js";
 loadEnv();
 
+
+
 // 设置端口
 const PORT = process.env.PORT || 4001;
 
@@ -26,7 +28,77 @@ import auth from "./middlewares/authMiddleware.js";
 // import paymentRoutes from "./routes/paymentRoutes.js";
 // import uploadRoutes from "./routes/uploadRoutes.js";
 
+// 检查环境变量是否加载成功的函数
+function checkEnvironmentVariables() {
+  console.log('\n======== 环境变量检查 ========');
+  
+  // 检查必要的环境变量
+  const requiredVars = [
+    'DATABASE_URL',
+    'SESSION_SECRET',
+    'NODE_ENV'
+  ];
+  
+  // 检查可选但重要的环境变量
+  const optionalVars = [
+    'PORT',
+    'DIRECT_URL',
+    'AWS_REGION',
+    'AWS_S3_BUCKET_NAME'
+  ];
+  
+  // 检查必要的环境变量
+  let missingRequired = false;
+  console.log('必要环境变量:');
+  for (const varName of requiredVars) {
+    if (process.env[varName]) {
+      // 对于敏感信息，只显示是否存在，不显示具体值
+      if (varName.includes('SECRET') || varName.includes('KEY') || varName.includes('PASSWORD') || varName.includes('URL')) {
+        console.log(`✅ ${varName}: [已设置]`);
+      } else {
+        console.log(`✅ ${varName}: ${process.env[varName]}`);
+      }
+    } else {
+      console.log(`❌ ${varName}: 未设置`);
+      missingRequired = true;
+    }
+  }
+  
+  // 检查可选的环境变量
+  console.log('\n可选环境变量:');
+  for (const varName of optionalVars) {
+    if (process.env[varName]) {
+      // 对于敏感信息，只显示是否存在，不显示具体值
+      if (varName.includes('SECRET') || varName.includes('KEY') || varName.includes('PASSWORD') || varName.includes('URL')) {
+        console.log(`✅ ${varName}: [已设置]`);
+      } else {
+        console.log(`✅ ${varName}: ${process.env[varName]}`);
+      }
+    } else {
+      console.log(`⚠️ ${varName}: 未设置`);
+    }
+  }
+  
+  console.log('\n当前环境:', process.env.NODE_ENV || 'development');
+  
+  if (missingRequired) {
+    console.log('\n⚠️ 警告: 一些必要的环境变量未设置，这可能导致应用程序无法正常工作。');
+  } else {
+    console.log('\n✅ 所有必要的环境变量已设置。');
+  }
+  
+  console.log('==============================\n');
+  
+  return !missingRequired;
+}
+
 async function startServer() {
+  // 检查环境变量
+  const envCheckPassed = checkEnvironmentVariables();
+  if (!envCheckPassed) {
+    console.warn('环境变量检查未通过，但尝试继续启动服务器...');
+  }
+
   // 连接数据库
   await connectDB();
 

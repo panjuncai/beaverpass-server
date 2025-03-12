@@ -17,7 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 尝试加载项目根目录的 .env 文件
-const rootDir = path.resolve(__dirname, '../../');
+const rootDir = path.resolve(__dirname, '../../../');
 const envPath = path.join(rootDir, '.env');
 
 if (fs.existsSync(envPath)) {
@@ -90,6 +90,7 @@ async function loginUser() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        operationName: 'Login',
         query: loginMutation,
         variables: loginVariables
       }),
