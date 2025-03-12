@@ -18,7 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 尝试加载项目根目录的 .env 文件
-const rootDir = path.resolve(__dirname, '../../');
+const rootDir = path.resolve(__dirname, '../../../');
 const envPath = path.join(rootDir, '.env');
 
 if (fs.existsSync(envPath)) {
@@ -35,7 +35,7 @@ if (!process.env.USE_PRISMA) {
 }
 
 // GraphQL 服务器地址
-const API_URL = process.env.API_URL || 'http://localhost:4000/graphql';
+const API_URL = process.env.API_URL || 'http://localhost:4001/graphql';
 
 // 尝试加载用户测试信息
 let userInfo;
@@ -96,6 +96,7 @@ async function verifyUser() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        operationName: "VerifyUser",
         query: verifyMutation,
         variables: verifyVariables
       })

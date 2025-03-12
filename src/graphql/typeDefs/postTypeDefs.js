@@ -1,49 +1,18 @@
 import { gql } from 'apollo-server-express';
 
 const postTypeDefs = gql`
-  enum PostStatus {
-    active
-    inactive
-    sold
-    deleted
-  }
-
-  enum PostCategory {
-    Living_Room_Furniture
-    Bedroom_Furniture
-    Dining_Room_Furniture
-    Office_Furniture
-    Outdoor_Furniture
-    Storage
-    Other
-  }
-
-  enum PostCondition {
-    Like_New
-    Gently_Used
-    Minor_Scratches
-    Stains
-    Needs_Repair
-  }
-
-  enum DeliveryType {
-    Home_Delivery
-    Pickup
-    Both
-  }
-
   # 帖子类型
   type Post {
     id: ID!
-    category: PostCategory!
+    category: String!
     title: String!
     description: String!
-    condition: PostCondition!
+    condition: String!
     images: PostImages!
     price: PostPrice!
-    deliveryType: DeliveryType!
+    deliveryType: String!
     poster: User!
-    status: PostStatus!
+    status: String!
     createdAt: String!
     updatedAt: String!
   }
@@ -79,33 +48,34 @@ const postTypeDefs = gql`
 
   # 帖子过滤条件输入
   input PostFilterInput {
-    category: PostCategory
-    condition: PostCondition
+    category: String
+    condition: String
     priceRange: String
-    status: PostStatus
+    status: String
   }
 
   # 创建帖子输入
   input CreatePostInput {
-    category: PostCategory!
+    category: String! @constraint(maxLength: 50)
     title: String! @constraint(maxLength: 100)
     description: String! @constraint(maxLength: 500)
-    condition: PostCondition!
+    condition: String! @constraint(maxLength: 50)
     images: PostImagesInput!
     price: PostPriceInput!
-    deliveryType: DeliveryType!
+    deliveryType: String! @constraint(maxLength: 50)
   }
 
   # 更新帖子输入
   input UpdatePostInput {
-    category: PostCategory
+    id: ID!
+    category: String @constraint(maxLength: 50)
     title: String @constraint(maxLength: 100)
     description: String @constraint(maxLength: 500)
-    condition: PostCondition
+    condition: String @constraint(maxLength: 50)
     images: PostImagesInput
     price: PostPriceInput
-    deliveryType: DeliveryType
-    status: PostStatus
+    deliveryType: String @constraint(maxLength: 50)
+    status: String @constraint(maxLength: 20)
   }
 
   # 帖子图片输入
@@ -147,7 +117,7 @@ const postTypeDefs = gql`
     updatePost(id: ID!, input: UpdatePostInput!): PostRsp!
     
     # 更新帖子状态
-    updatePostStatus(id: ID!, status: PostStatus!): PostRsp!
+    updatePostStatus(id: ID!, status: String!): PostRsp!
     
     # 删除帖子（实际上是将状态设置为deleted）
     deletePost(id: ID!): PostRsp!

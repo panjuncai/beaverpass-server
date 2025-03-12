@@ -1,31 +1,30 @@
 import {
-  createUser,
-  getUserById,
-  getUserByEmail,
-  updateUser,
-  verifyUser,
+  updateUserWithPrisma,
   getUserByEmailWithPrisma,
+  createUserWithPrisma,
+  verifyUserWithPrisma,
 } from "../../models/User.js";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
-import { formatUserToCamel, formatEntityToSnake } from "../../utils/helper.js";
-
-// 检查是否使用 Prisma
-const USE_PRISMA = process.env.USE_PRISMA === 'true';
 
 const authResolvers = {
   Query: {
     getUserById: async (_, { id }) => {
       try {
-        const { data, error } = await getUserById(id);
+        const { data, error } = await getUserByIdWithPrisma(id);
         if (error) throw new Error(error.message);
         if (!data) throw new Error("User not found");
+        
+        // 创建一个不包含敏感信息的用户对象
+        const safeUser = { ...data };
+        delete safeUser.password;
+        delete safeUser.verificationToken;
         
         return {
           code: 0,
           msg: "User found",
-          data: USE_PRISMA ? data : formatUserToCamel(data)
+          data: safeUser
         };
       } catch (error) {
         return {
@@ -38,14 +37,19 @@ const authResolvers = {
     
     getUserByEmail: async (_, { email }) => {
       try {
-        const { data, error } = await getUserByEmail(email);
+        const { data, error } = await getUserByEmailWithPrisma(email);
         if (error) throw new Error(error.message);
         if (!data) throw new Error("User not found");
+
+        // 创建一个不包含敏感信息的用户对象
+        const safeUser = { ...data };
+        delete safeUser.password;
+        delete safeUser.verificationToken;
         
         return {
           code: 0,
           msg: "User found",
-          data: USE_PRISMA ? data : formatUserToCamel(data)
+          data: safeUser
         };
       } catch (error) {
         return {
@@ -59,10 +63,16 @@ const authResolvers = {
     // 检查会话状态
     checkSession: async (_, __, { req }) => {
       if (req.session.user) {
+        // 会话中的用户信息应该已经是安全的（不包含密码和验证令牌）
+        // 但为了确保安全，我们再次检查并移除敏感字段
+        const safeUser = { ...req.session.user };
+        if (safeUser.password) delete safeUser.password;
+        if (safeUser.verificationToken) delete safeUser.verificationToken;
+        
         return {
           code: 0,
           msg: "Session is valid",
-          data: req.session.user,
+          data: safeUser,
         };
       } else {
         return {
@@ -79,7 +89,7 @@ const authResolvers = {
     register: async (_, { input }) => {
       try {
         // 检查用户是否已存在
-        const { data: existingUser, error: checkError } = await getUserByEmail(input.email);
+        const { data: existingUser, error: checkError } = await getUserByEmailWithPrisma(input.email);
         if (existingUser) {
           throw new Error("User already exists");
         }
@@ -95,26 +105,14 @@ const authResolvers = {
         const verificationToken = crypto.randomBytes(32).toString("hex");
         
         // 根据是否使用 Prisma 准备用户数据
-        let userData;
-        if (USE_PRISMA) {
-          userData = {
+        let userData = {
             ...restInput,
             password: hashedPassword,
             verificationToken: verificationToken,
             isVerified: false,
           };
-        } else {
-          userData = {
-            ...formatEntityToSnake(restInput),
-            password: hashedPassword,
-            verification_token: verificationToken,
-            is_verified: false,
-            created_at: new Date(),
-            updated_at: new Date(),
-          };
-        }
         
-        const { data: user, error: createError } = await createUser(userData);
+        const { data: user, error: createError } = await createUserWithPrisma(userData);
         if (createError) throw new Error(createError.message);
         
         // 验证邮件链接
@@ -138,10 +136,15 @@ const authResolvers = {
         <a href="${verifyLink}">${verifyLink}</a>`,
         });
 
+        // 创建一个不包含敏感信息的用户对象
+        const safeUser = { ...user };
+        delete safeUser.password;
+        delete safeUser.verificationToken;
+
         return {
           code: 0,
           msg: "Registration successful, please check your email for verification",
-          data: USE_PRISMA ? user : formatUserToCamel(user),
+          data: safeUser,
         };
       } catch (e) {
         return {
@@ -165,13 +168,20 @@ const authResolvers = {
         );
         if (!isPasswordValid) throw new Error("Password is incorrect");
 
-        // 将用户信息存储在 session 中
-        req.session.user = USE_PRISMA ? user : formatUserToCamel(user);
+        // 创建一个不包含敏感信息的用户对象
+        const safeUser = { ...user };
+        
+        // 移除敏感字段
+        delete safeUser.password;
+        delete safeUser.verificationToken;
+        
+        // 将安全的用户信息存储在 session 中
+        req.session.user = safeUser;
 
         return {
           code: 0,
           msg: "Login successful",
-          data: USE_PRISMA ? user : formatUserToCamel(user),
+          data: safeUser
         };
       } catch (e) {
         return {
@@ -208,22 +218,25 @@ const authResolvers = {
     // 验证邮箱
     verifyUser: async (_, { verificationToken }) => {
       try {
-        const { data: user, error: verifyError } = await verifyUser(verificationToken);
+        const { data: user, error: verifyError } = await verifyUserWithPrisma(verificationToken);
         if (verifyError) throw new Error(verifyError.message);
         if (!user) throw new Error("User not found");
         
         // 根据是否使用 Prisma 准备更新数据
-        const updateData = USE_PRISMA 
-          ? { isVerified: true } 
-          : { is_verified: true, updated_at: new Date() };
+        const updateData = { isVerified: true };
         
-        const { data: updatedUser, error: updateError } = await updateUser(user.id, updateData);
+        const { data: updatedUser, error: updateError } = await updateUserWithPrisma(user.id, updateData);
         if (updateError) throw new Error(updateError.message);
+        
+        // 创建一个不包含敏感信息的用户对象
+        const safeUser = { ...updatedUser };
+        delete safeUser.password;
+        delete safeUser.verificationToken;
         
         return {
           code: 0,
           msg: "Email verified successfully",
-          data: USE_PRISMA ? updatedUser : formatUserToCamel(updatedUser),
+          data: safeUser,
         };
       } catch (e) {
         return {
@@ -243,22 +256,23 @@ const authResolvers = {
         }
         
         // 根据是否使用 Prisma 准备更新数据
-        const updateData = USE_PRISMA 
-          ? userData 
-          : formatEntityToSnake(userData);
+        const updateData = userData;
         
-        const { data: updatedUser, error } = await updateUser(id, updateData);
+        const { data: updatedUser, error } = await updateUserWithPrisma(id, updateData);
         if (error) throw new Error(error.message);
         
+        // 创建一个不包含敏感信息的用户对象
+        const safeUser = { ...updatedUser };
+        delete safeUser.password;
+        delete safeUser.verificationToken;
+        
         // 更新 session 中的用户信息
-        req.session.user = USE_PRISMA 
-          ? updatedUser 
-          : formatUserToCamel(updatedUser);
+        req.session.user = safeUser;
         
         return {
           code: 0,
           msg: "User updated successfully",
-          data: USE_PRISMA ? updatedUser : formatUserToCamel(updatedUser),
+          data: safeUser,
         };
       } catch (e) {
         return {

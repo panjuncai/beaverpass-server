@@ -17,7 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 尝试加载项目根目录的 .env 文件
-const rootDir = path.resolve(__dirname, '../../');
+const rootDir = path.resolve(__dirname, '../../../');
 const envPath = path.join(rootDir, '.env');
 
 if (fs.existsSync(envPath)) {
@@ -74,7 +74,7 @@ const loginVariables = {
 
 // 创建帖子的 GraphQL 查询
 const createPostMutation = `
-  mutation CreatePost($input: PostInput!) {
+  mutation CreatePost($input: CreatePostInput!) {
     createPost(input: $input) {
       code
       msg
@@ -118,7 +118,7 @@ const createPostVariables = {
       DAMAGE: null
     },
     price: {
-      amount: "100.00",
+      amount: 100.00,
       isFree: false,
       isNegotiable: true
     },
@@ -137,6 +137,7 @@ async function createPost() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        operationName: "Login",
         query: loginMutation,
         variables: loginVariables
       }),
@@ -158,6 +159,7 @@ async function createPost() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        operationName: "CreatePost",
         query: createPostMutation,
         variables: createPostVariables
       }),

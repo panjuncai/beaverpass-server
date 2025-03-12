@@ -33,10 +33,10 @@ model User {
 
 model Post {
   id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  category          post_category_enum
+  category          String              @db.VarChar(50)
   title             String
   description       String
-  condition         post_condition_enum
+  condition         String              @db.VarChar(50)
   imageFront        String              @map("image_front")
   imageSide         String?             @map("image_side")
   imageBack         String?             @map("image_back")
@@ -44,9 +44,9 @@ model Post {
   priceAmount       Decimal?            @map("price_amount") @db.Decimal
   priceIsFree       Boolean?            @default(false) @map("price_is_free")
   priceIsNegotiable Boolean?            @default(false) @map("price_is_negotiable")
-  deliveryType      delivery_type_enum  @map("delivery_type")
+  deliveryType      String              @map("delivery_type") @db.VarChar(50)
   posterId          String?             @map("poster_id") @db.Uuid
-  status            post_status_enum?   @default(active)
+  status            String?             @default("active") @db.VarChar(20)
   createdAt         DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   messages          Message[]
@@ -82,7 +82,7 @@ model Message {
   senderId    String?            @map("sender_id") @db.Uuid
   content     String?
   postId      String?            @map("post_id") @db.Uuid
-  messageType message_type_enum? @default(text) @map("message_type")
+  messageType String?            @default("text") @map("message_type") @db.VarChar(20)
   createdAt   DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   readBy      MessageReadBy[]
@@ -125,56 +125,10 @@ model orders {
   service_fee                   Decimal?           @default(0) @db.Decimal(12, 2)
   tax                           Decimal?           @default(0) @db.Decimal(12, 2)
   total                         Decimal            @db.Decimal(12, 2)
-  status                        order_status_enum? @default(pending_payment)
+  status                        String?            @default("pending_payment") @db.VarChar(20)
   created_at                    DateTime?          @default(now()) @db.Timestamptz(6)
   updated_at                    DateTime?          @default(now()) @db.Timestamptz(6)
   users_orders_buyer_idTousers  User               @relation("orders_buyer_idTousers", fields: [buyer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   posts                         Post               @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_orders_seller_idTousers User               @relation("orders_seller_idTousers", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-enum delivery_type_enum {
-  Home_Delivery @map("Home Delivery")
-  Pickup
-  Both
-}
-
-enum message_type_enum {
-  text
-  image
-  post
-}
-
-enum order_status_enum {
-  pending_payment
-  paid
-  shipped
-  completed
-  canceled
-  refunded
-}
-
-enum post_category_enum {
-  Living_Room_Furniture @map("Living Room Furniture")
-  Bedroom_Furniture     @map("Bedroom Furniture")
-  Dining_Room_Furniture @map("Dining Room Furniture")
-  Office_Furniture      @map("Office Furniture")
-  Outdoor_Furniture     @map("Outdoor Furniture")
-  Storage
-  Other
-}
-
-enum post_condition_enum {
-  Like_New        @map("Like New")
-  Gently_Used     @map("Gently Used")
-  Minor_Scratches @map("Minor Scratches")
-  Stains
-  Needs_Repair    @map("Needs Repair")
-}
-
-enum post_status_enum {
-  active
-  inactive
-  sold
-  deleted
 }

@@ -9,6 +9,7 @@ const authTypeDefs = gql`
     avatar: String
     address: String
     phone: String
+    isVerified: Boolean
     createdAt: String!
     updatedAt: String!
   }

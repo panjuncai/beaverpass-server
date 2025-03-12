@@ -17,7 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 尝试加载项目根目录的 .env 文件
-const rootDir = path.resolve(__dirname, '../../');
+const rootDir = path.resolve(__dirname, '../../../');
 const envPath = path.join(rootDir, '.env');
 
 if (fs.existsSync(envPath)) {
@@ -34,7 +34,7 @@ if (!process.env.USE_PRISMA) {
 }
 
 // GraphQL 服务器地址
-const API_URL = process.env.API_URL || 'http://localhost:4000/graphql';
+const API_URL = process.env.API_URL || 'http://localhost:4001/graphql';
 
 // 注册用户的 GraphQL 查询
 const registerMutation = `
@@ -57,9 +57,9 @@ const registerMutation = `
 // 注册用户的数据
 const registerVariables = {
   input: {
-    email: "test_user_" + Math.floor(Math.random() * 10000) + "@example.com",
-    password: "Password123!",
-    confirmPassword: "Password123!",
+    email: "qqxpp0001@126.com",
+    password: "1",
+    confirmPassword: "1",
     firstName: "Test",
     lastName: "User"
   }
@@ -77,6 +77,7 @@ async function registerUser() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        operationName: "Register",
         query: registerMutation,
         variables: registerVariables
       }),
