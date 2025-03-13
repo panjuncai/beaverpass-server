@@ -1,5 +1,5 @@
-const { AuthenticationError, UserInputError, ForbiddenError } = require('apollo-server-express');
-const { PrismaClient } = require('@prisma/client');
+import { AuthenticationError, UserInputError, ForbiddenError } from 'apollo-server-express';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -45,7 +45,7 @@ const formatChatRoom = (chatRoom) => {
 
 const chatResolvers = {
   Query: {
-    chatRooms: async (_, __, { user }) => {
+    getChatRooms: async (_, __, { user }) => {
       if (!user) {
         throw new AuthenticationError('You must be logged in to view chat rooms');
       }
@@ -97,7 +97,7 @@ const chatResolvers = {
       });
     },
     
-    chatRoom: async (_, { id }, { user }) => {
+    getChatRoom: async (_, { chatRoomId }, { user }) => {
       if (!user) {
         throw new AuthenticationError('You must be logged in to view a chat room');
       }
@@ -106,7 +106,7 @@ const chatResolvers = {
       const participant = await prisma.chatRoomParticipant.findUnique({
         where: {
           chatRoomId_userId: {
-            chatRoomId: id,
+            chatRoomId,
             userId: user.id
           }
         }
@@ -118,7 +118,7 @@ const chatResolvers = {
       
       // Get the chat room with participants and messages
       const chatRoom = await prisma.chatRoom.findUnique({
-        where: { id },
+        where: { id: chatRoomId },
         include: {
           participants: {
             include: {
@@ -155,7 +155,7 @@ const chatResolvers = {
       };
     },
     
-    messages: async (_, { chatRoomId, limit = 20, offset = 0 }, { user }) => {
+    getMessages: async (_, { roomId: chatRoomId, limit = 20, offset = 0 }, { user }) => {
       if (!user) {
         throw new AuthenticationError('You must be logged in to view messages');
       }
@@ -586,4 +586,4 @@ const chatResolvers = {
   }
 };
 
-module.exports = chatResolvers; 
+export default chatResolvers; 

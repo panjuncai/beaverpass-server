@@ -1,8 +1,6 @@
-const userResolvers = require('./userResolvers');
-const postResolvers = require('./postResolvers');
-const chatResolvers = require('./chatResolvers');
-const orderResolvers = require('./orderResolvers');
-const { GraphQLScalarType, Kind } = require('graphql');
+import userResolvers from './userResolvers.js';
+import chatResolvers from './chatResolvers.js';
+import { GraphQLScalarType, Kind } from 'graphql';
 
 // Create custom DateTime scalar type
 const DateTime = new GraphQLScalarType({
@@ -35,22 +33,12 @@ const resolvers = {
   
   Query: {
     ...userResolvers.Query,
-    ...postResolvers.Query,
-    ...chatResolvers.Query,
-    ...orderResolvers.Query
+    ...chatResolvers.Query
   },
   Mutation: {
     ...userResolvers.Mutation,
-    ...postResolvers.Mutation,
-    ...chatResolvers.Mutation,
-    ...orderResolvers.Mutation
-  },
-  User: userResolvers.User,
-  Post: postResolvers.Post,
-  ChatRoom: chatResolvers.ChatRoom,
-  Message: chatResolvers.Message,
-  MessageReadBy: chatResolvers.MessageReadBy,
-  Order: orderResolvers.Order
+    ...chatResolvers.Mutation
+  }
 };
 
-module.exports = resolvers;
+export default resolvers;

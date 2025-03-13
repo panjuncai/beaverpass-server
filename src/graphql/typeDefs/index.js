@@ -1,10 +1,9 @@
-const { gql } = require('apollo-server-express');
-const userTypeDefs = require('./userTypeDefs');
-const postTypeDefs = require('./postTypeDefs');
-const chatTypeDefs = require('./chatTypeDefs');
-const orderTypeDefs = require('./orderTypeDefs');
+import { gql } from 'apollo-server-express';
+import baseTypeDefs from './baseTypeDefs.js';
+import userTypeDefs from './userTypeDefs.js';
+import chatTypeDefs from './chatTypeDefs.js';
 
-const baseTypeDefs = gql`
+const rootTypeDefs = gql`
   type Query {
     _: Boolean
   }
@@ -14,10 +13,9 @@ const baseTypeDefs = gql`
   }
 `;
 
-module.exports = [
+export default [
+  rootTypeDefs,
   baseTypeDefs,
   userTypeDefs,
-  postTypeDefs,
-  chatTypeDefs,
-  orderTypeDefs
+  chatTypeDefs
 ]; 

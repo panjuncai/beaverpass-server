@@ -1,6 +1,6 @@
-const { gql } = require('apollo-server-express');
+import { gql } from 'apollo-server-express';
 
-module.exports = gql`
+export default gql`
   enum OrderStatus {
     PENDING_PAYMENT
     PAID
@@ -13,11 +13,10 @@ module.exports = gql`
   type Order {
     id: ID!
     buyer: User!
-    buyerId: ID!
     seller: User!
-    sellerId: ID!
     post: Post!
-    postId: ID!
+    title: String!
+    price: Float!
     shippingAddress: String!
     shippingReceiver: String!
     shippingPhone: String!
@@ -29,8 +28,8 @@ module.exports = gql`
     tax: Float
     total: Float!
     status: OrderStatus!
-    createdAt: String
-    updatedAt: String
+    createdAt: String!
+    updatedAt: String!
   }
 
   input CreateOrderInput {
@@ -41,23 +40,25 @@ module.exports = gql`
     paymentMethod: String!
   }
 
-  input UpdateOrderInput {
-    id: ID!
-    status: OrderStatus
-    paymentTransactionId: String
+  type OrderResponse {
+    code: Int!
+    success: Boolean!
+    message: String!
+    order: Order
   }
 
   extend type Query {
-    orders: [Order]
-    order(id: ID!): Order
-    userOrders(userId: ID!): [Order]
-    buyerOrders(buyerId: ID!): [Order]
-    sellerOrders(sellerId: ID!): [Order]
+    getOrders: [Order!]!
+    getOrder(id: ID!): OrderResponse!
+    getUserOrders: [Order!]!
+    getBuyerOrders: [Order!]!
+    getSellerOrders: [Order!]!
   }
 
   extend type Mutation {
-    createOrder(input: CreateOrderInput!): Order
-    updateOrder(input: UpdateOrderInput!): Order
-    cancelOrder(id: ID!): Order
+    createOrder(input: CreateOrderInput!): OrderResponse!
+    updateOrderStatus(id: ID!, status: OrderStatus!): OrderResponse!
+    updateOrder(id: ID!, status: OrderStatus, paymentTransactionId: String): OrderResponse!
+    cancelOrder(id: ID!): OrderResponse!
   }
 `; 

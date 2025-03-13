@@ -1,45 +1,46 @@
-const { ApolloServer } = require('apollo-server-express');
-const { makeExecutableSchema } = require('@graphql-tools/schema');
-const { PrismaClient } = require('@prisma/client');
-const jwt = require('jsonwebtoken');
+import { ApolloServer } from 'apollo-server-express';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { PrismaClient } from '@prisma/client';
+import { constraintDirective, constraintDirectiveTypeDefs } from 'graphql-constraint-directive';
+import { verifySupabaseToken, extractTokenFromRequest } from '../middleware/supabaseAuth.js';
+import supabase from '../config/supabase.js';
 
-const typeDefs = require('./typeDefs');
-const resolvers = require('./resolvers');
+import typeDefs from './typeDefs/index.js';
+import resolvers from './resolvers/index.js';
 
 const prisma = new PrismaClient();
 
 // Create executable schema
-const schema = makeExecutableSchema({
-  typeDefs,
+let schema = makeExecutableSchema({
+  typeDefs: [constraintDirectiveTypeDefs, ...typeDefs],
   resolvers
 });
 
+// Apply constraint directive
+schema = constraintDirective()(schema);
+
 // Context function for HTTP requests
 const context = async ({ req }) => {
-  // Get the token from the request headers
-  const token = req.headers.authorization?.split(' ')[1] || '';
+  // 获取请求头中的 JWT 令牌
+  const token = extractTokenFromRequest(req);
   
   if (!token) {
-    return { prisma };
+    return { prisma, supabase };
   }
   
   try {
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    // 验证 Supabase 令牌并获取用户信息
+    const user = await verifySupabaseToken(token);
     
-    // Get the user from the database
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id }
-    });
-    
-    return { user, prisma };
+    return { user, prisma, supabase };
   } catch (error) {
-    return { prisma };
+    console.error('Authentication error:', error);
+    return { prisma, supabase };
   }
 };
 
 // Create Apollo Server
-const createApolloServer = () => {
+export const createApolloServer = () => {
   return new ApolloServer({
     schema,
     context,
@@ -56,8 +57,4 @@ const createApolloServer = () => {
       }
     ]
   });
-};
-
-module.exports = {
-  createApolloServer
 };

@@ -1,35 +1,27 @@
-const { gql } = require('apollo-server-express');
+import { gql } from 'apollo-server-express';
 
-module.exports = gql`
+export default gql`
   type User {
     id: ID!
     email: String!
-    firstName: String!
-    lastName: String!
+    firstName: String
+    lastName: String
     avatar: String
     address: String
     phone: String
-    isVerified: Boolean
     createdAt: String
     updatedAt: String
-    posts: [Post]
-    buyerOrders: [Order]
-    sellerOrders: [Order]
   }
 
-  input RegisterInput {
-    email: String!
-    password: String!
-    firstName: String!
-    lastName: String!
-    phone: String
+  # 用户响应类型
+  type UserResponse {
+    code: Int!
+    success: Boolean!
+    message: String!
+    user: User
   }
 
-  input LoginInput {
-    email: String!
-    password: String!
-  }
-
+  # 更新用户输入类型
   input UpdateUserInput {
     firstName: String
     lastName: String
@@ -38,29 +30,15 @@ module.exports = gql`
     phone: String
   }
 
-  input ChangePasswordInput {
-    currentPassword: String!
-    newPassword: String!
-  }
-
-  type AuthPayload {
-    token: String!
-    user: User!
-  }
-
+  # 查询
   extend type Query {
     me: User
     user(id: ID!): User
-    users: [User]
+    users: [User!]!
   }
 
+  # 变更
   extend type Mutation {
-    register(input: RegisterInput!): AuthPayload!
-    login(input: LoginInput!): AuthPayload!
-    updateUser(input: UpdateUserInput!): User!
-    changePassword(input: ChangePasswordInput!): Boolean!
-    verifyEmail(token: String!): Boolean!
-    requestPasswordReset(email: String!): Boolean!
-    resetPassword(token: String!, newPassword: String!): Boolean!
+    updateUser(input: UpdateUserInput!): UserResponse!
   }
 `; 

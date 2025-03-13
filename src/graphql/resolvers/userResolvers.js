@@ -1,48 +1,74 @@
-const { AuthenticationError, UserInputError } = require('apollo-server-express');
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+import { AuthenticationError, UserInputError } from 'apollo-server-express';
+import prisma from '../../lib/prisma.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 
-const prisma = new PrismaClient();
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
 // Helper function to generate a JWT token
 const generateToken = (user) => {
   return jwt.sign(
     { id: user.id, email: user.email },
-    process.env.JWT_SECRET || 'your-secret-key',
+    process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
 };
 
 const userResolvers = {
   Query: {
-    me: async (_, __, { user }) => {
+    // 获取当前登录用户信息
+    me: async (_, __, { user, supabase }) => {
       if (!user) {
-        return null;
+        throw new AuthenticationError('未登录');
       }
       
-      return prisma.user.findUnique({
-        where: { id: user.id }
-      });
+      return user;
     },
     
-    user: async (_, { id }, { user }) => {
+    // 根据 ID 获取用户信息
+    user: async (_, { id }, { user, supabase }) => {
       if (!user) {
-        throw new AuthenticationError('You must be logged in to view user profiles');
+        throw new AuthenticationError('您必须登录才能查看用户资料');
       }
       
-      return prisma.user.findUnique({
-        where: { id }
-      });
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (error) {
+        throw new Error(`获取用户信息失败: ${error.message}`);
+      }
+      
+      return data;
     },
     
-    users: async (_, __, { user }) => {
+    // 获取所有用户（可能需要管理员权限）
+    users: async (_, __, { user, supabase }) => {
       if (!user) {
-        throw new AuthenticationError('You must be logged in to view users');
+        throw new AuthenticationError('您必须登录才能查看用户列表');
       }
       
-      return prisma.user.findMany();
+      // 检查是否为管理员（可选）
+      // if (!user.is_admin) {
+      //   throw new AuthenticationError('只有管理员可以查看所有用户');
+      // }
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('*');
+        
+      if (error) {
+        throw new Error(`获取用户列表失败: ${error.message}`);
+      }
+      
+      return data;
     }
   },
   
@@ -118,26 +144,47 @@ const userResolvers = {
       };
     },
     
-    updateUser: async (_, { input }, { user }) => {
+    // 更新用户资料
+    updateUser: async (_, { input }, { user, supabase }) => {
       if (!user) {
-        throw new AuthenticationError('You must be logged in to update your profile');
+        throw new AuthenticationError('您必须登录才能更新个人资料');
       }
       
       const { firstName, lastName, avatar, address, phone } = input;
       
-      // Update user
-      const updatedUser = await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          ...(firstName && { firstName }),
-          ...(lastName && { lastName }),
-          ...(avatar && { avatar }),
-          ...(address && { address }),
-          ...(phone && { phone })
+      try {
+        // 更新用户资料
+        const { data, error } = await supabase
+          .from('users')
+          .update({
+            ...(firstName && { first_name: firstName }),
+            ...(lastName && { last_name: lastName }),
+            ...(avatar && { avatar_url: avatar }),
+            ...(address && { address }),
+            ...(phone && { phone })
+          })
+          .eq('id', user.id)
+          .select()
+          .single();
+          
+        if (error) {
+          throw new Error(error.message);
         }
-      });
-      
-      return updatedUser;
+        
+        return {
+          code: 200,
+          success: true,
+          message: '用户资料更新成功',
+          user: data
+        };
+      } catch (error) {
+        return {
+          code: 500,
+          success: false,
+          message: `更新失败: ${error.message}`,
+          user: null
+        };
+      }
     },
     
     changePassword: async (_, { input }, { user }) => {
@@ -289,4 +336,4 @@ const userResolvers = {
   }
 };
 
-module.exports = userResolvers; 
+export default userResolvers; 

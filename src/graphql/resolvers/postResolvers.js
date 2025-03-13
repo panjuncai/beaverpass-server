@@ -1,9 +1,4 @@
 import {
-  getPostsByFilter,
-  getPostById,
-  createPost,
-  updatePost,
-  getPostsByPosterId,
   // 添加 Prisma 方法
   getPostsByFilterWithPrisma,
   createPostWithPrisma,

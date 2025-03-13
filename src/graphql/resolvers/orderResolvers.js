@@ -1,5 +1,5 @@
-const { AuthenticationError, UserInputError, ForbiddenError } = require('apollo-server-express');
-const { PrismaClient } = require('@prisma/client');
+import { AuthenticationError, UserInputError, ForbiddenError } from 'apollo-server-express';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -70,7 +70,7 @@ const calculateOrderTotal = async (postId, deliveryFee = 0) => {
 
 const orderResolvers = {
   Query: {
-    orders: async (_, __, { user }) => {
+    getOrders: async (_, __, { user }) => {
       if (!user) {
         throw new AuthenticationError('You must be logged in to view orders');
       }
@@ -90,7 +90,7 @@ const orderResolvers = {
       return orders.map(formatOrder);
     },
     
-    order: async (_, { id }, { user }) => {
+    getOrder: async (_, { id }, { user }) => {
       if (!user) {
         throw new AuthenticationError('You must be logged in to view an order');
       }
@@ -120,7 +120,7 @@ const orderResolvers = {
       return formatOrder(order);
     },
     
-    userOrders: async (_, { userId }, { user }) => {
+    getUserOrders: async (_, { userId }, { user }) => {
       if (!user) {
         throw new AuthenticationError('You must be logged in to view orders');
       }
@@ -151,7 +151,7 @@ const orderResolvers = {
       return orders.map(formatOrder);
     },
     
-    buyerOrders: async (_, { buyerId }, { user }) => {
+    getBuyerOrders: async (_, { buyerId }, { user }) => {
       if (!user) {
         throw new AuthenticationError('You must be logged in to view orders');
       }
@@ -177,7 +177,7 @@ const orderResolvers = {
       return orders.map(formatOrder);
     },
     
-    sellerOrders: async (_, { sellerId }, { user }) => {
+    getSellerOrders: async (_, { sellerId }, { user }) => {
       if (!user) {
         throw new AuthenticationError('You must be logged in to view orders');
       }
@@ -412,4 +412,4 @@ const orderResolvers = {
   }
 };
 
-module.exports = orderResolvers; 
+export default orderResolvers; 

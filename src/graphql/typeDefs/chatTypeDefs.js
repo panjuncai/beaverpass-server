@@ -1,6 +1,6 @@
-const { gql } = require('apollo-server-express');
+import { gql } from 'apollo-server-express';
 
-module.exports = gql`
+export default gql`
   enum MessageType {
     TEXT
     IMAGE
@@ -10,35 +10,29 @@ module.exports = gql`
   type ChatRoom {
     id: ID!
     participants: [User!]!
-    messages: [Message!]
-    createdAt: String
+    messages: [Message!]!
+    unreadCount: Int
+    lastMessage: Message
+    createdAt: String!
   }
 
   type Message {
     id: ID!
-    chatRoom: ChatRoom!
-    chatRoomId: ID!
+    room: ChatRoom!
     sender: User
-    senderId: ID
     content: String
     post: Post
-    postId: ID
     messageType: MessageType!
-    readBy: [MessageReadBy!]
-    createdAt: String
-    updatedAt: String
+    readBy: [MessageReadBy!]!
+    createdAt: String!
+    updatedAt: String!
   }
 
   type MessageReadBy {
+    id: ID!
     message: Message!
-    messageId: ID!
     user: User!
-    userId: ID!
-    readAt: String
-  }
-
-  input CreateChatRoomInput {
-    participantIds: [ID!]!
+    readAt: String!
   }
 
   input SendMessageInput {
@@ -48,20 +42,35 @@ module.exports = gql`
     messageType: MessageType!
   }
 
-  input MarkMessageReadInput {
-    messageId: ID!
+  type ChatRoomResponse {
+    code: Int!
+    success: Boolean!
+    message: String!
+    chatRoom: ChatRoom
+  }
+
+  type MessageResponse {
+    code: Int!
+    success: Boolean!
+    message: String!
+    messageData: Message
   }
 
   extend type Query {
-    chatRooms: [ChatRoom!]!
-    chatRoom(id: ID!): ChatRoom
-    messages(chatRoomId: ID!, limit: Int, offset: Int): [Message!]!
+    getChatRooms: [ChatRoom!]!
+    getChatRoom(chatRoomId: ID!): ChatRoom
+    getMessages(chatRoomId: ID!, limit: Int, offset: Int): [Message!]!
     unreadMessagesCount: Int!
   }
 
   extend type Mutation {
-    createChatRoom(input: CreateChatRoomInput!): ChatRoom!
-    sendMessage(input: SendMessageInput!): Message!
-    markMessageRead(input: MarkMessageReadInput!): Boolean!
+    createChatRoom(userId: ID!): ChatRoomResponse!
+    sendMessage(input: SendMessageInput!): MessageResponse!
+    markMessagesAsRead(chatRoomId: ID!): Boolean!
+    markMessageRead(input: MessageReadInput!): Boolean!
+  }
+
+  input MessageReadInput {
+    messageId: ID!
   }
 `; 
