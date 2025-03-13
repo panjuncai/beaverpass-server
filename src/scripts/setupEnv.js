@@ -84,12 +84,9 @@ function showRequiredEnvVars() {
   console.log('- SESSION_SECRET: 会话密钥');
   console.log('- NODE_ENV: 运行环境 (development/production)');
   
-  console.log('\n数据库选择:');
-  console.log('- USE_PRISMA: 设置为 "true" 使用 Prisma，"false" 使用 Supabase');
-  
-  console.log('\n如果 USE_PRISMA="false"，还需要设置:');
-  console.log('- SUPABASE_URL: Supabase 项目 URL');
-  console.log('- SUPABASE_KEY: Supabase API 密钥');
+  console.log('\n数据库说明:');
+  console.log('- 系统默认使用 Prisma ORM 进行数据库操作');
+  console.log('- 确保 DATABASE_URL 正确配置，指向您的 PostgreSQL 数据库');
 }
 
 // 提示用户运行环境变量检查

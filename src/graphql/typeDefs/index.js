@@ -1,15 +1,10 @@
-import { gql } from 'apollo-server-express';
-import baseTypeDefs from './baseTypeDefs.js';
-import authTypeDefs from './authTypeDefs.js';
-import postTypeDefs from './postTypeDefs.js';
-import uploadTypes from './uploadTypes.js';
-import orderTypes from './orderTypes.js';
+const { gql } = require('apollo-server-express');
+const userTypeDefs = require('./userTypeDefs');
+const postTypeDefs = require('./postTypeDefs');
+const chatTypeDefs = require('./chatTypeDefs');
+const orderTypeDefs = require('./orderTypeDefs');
 
-// 基础类型定义，包含所有类型共享的基础类型
-const baseTypeDefsGql = gql`
-  # 自定义标量类型
-  scalar DateTime
-
+const baseTypeDefs = gql`
   type Query {
     _: Boolean
   }
@@ -17,20 +12,12 @@ const baseTypeDefsGql = gql`
   type Mutation {
     _: Boolean
   }
-
-  type Subscription {
-    _: Boolean
-  }
 `;
 
-// 合并所有类型定义
-const typeDefs = [
-  baseTypeDefsGql,
+module.exports = [
   baseTypeDefs,
-  authTypeDefs,
+  userTypeDefs,
   postTypeDefs,
-  uploadTypes,
-  orderTypes
-];
-
-export default typeDefs; 
+  chatTypeDefs,
+  orderTypeDefs
+]; 

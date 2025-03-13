@@ -1,35 +1,62 @@
 import { gql } from 'apollo-server-express';
 
 const postTypeDefs = gql`
+  enum PostCategory {
+    LIVING_ROOM_FURNITURE
+    BEDROOM_FURNITURE
+    DINING_ROOM_FURNITURE
+    OFFICE_FURNITURE
+    OUTDOOR_FURNITURE
+    STORAGE
+    OTHER
+  }
+
+  enum PostCondition {
+    LIKE_NEW
+    GENTLY_USED
+    MINOR_SCRATCHES
+    STAINS
+    NEEDS_REPAIR
+  }
+
+  enum DeliveryType {
+    HOME_DELIVERY
+    PICKUP
+    BOTH
+  }
+
+  enum PostStatus {
+    ACTIVE
+    INACTIVE
+    SOLD
+    DELETED
+  }
+
   # 帖子类型
   type Post {
     id: ID!
-    category: String!
+    category: PostCategory!
     title: String!
     description: String!
-    condition: String!
-    images: PostImages!
-    price: PostPrice!
-    deliveryType: String!
-    poster: User!
-    status: String!
-    createdAt: String!
-    updatedAt: String!
+    condition: PostCondition!
+    amount: Float!
+    isNegotiable: Boolean
+    deliveryType: DeliveryType!
+    poster: User
+    posterId: ID
+    status: PostStatus
+    createdAt: String
+    updatedAt: String
+    images: [PostImage]
   }
 
   # 帖子图片类型
-  type PostImages {
-    FRONT: String!
-    SIDE: String
-    BACK: String
-    DAMAGE: String
-  }
-
-  # 帖子价格类型
-  type PostPrice {
-    amount: String
-    isFree: Boolean!
-    isNegotiable: Boolean!
+  type PostImage {
+    id: ID!
+    postId: ID!
+    imageUrl: String!
+    imageType: String
+    createdAt: String
   }
 
   # 帖子响应类型
@@ -50,47 +77,52 @@ const postTypeDefs = gql`
   input PostFilterInput {
     category: String
     condition: String
-    priceRange: String
+    minPrice: Float
+    maxPrice: Float
     status: String
   }
 
   # 创建帖子输入
   input CreatePostInput {
-    category: String! @constraint(maxLength: 50)
-    title: String! @constraint(maxLength: 100)
-    description: String! @constraint(maxLength: 500)
-    condition: String! @constraint(maxLength: 50)
-    images: PostImagesInput!
-    price: PostPriceInput!
-    deliveryType: String! @constraint(maxLength: 50)
+    category: PostCategory!
+    title: String!
+    description: String!
+    condition: PostCondition!
+    amount: Float!
+    isNegotiable: Boolean
+    deliveryType: DeliveryType!
+    images: [PostImageInput]!
   }
 
   # 更新帖子输入
   input UpdatePostInput {
     id: ID!
-    category: String @constraint(maxLength: 50)
-    title: String @constraint(maxLength: 100)
-    description: String @constraint(maxLength: 500)
-    condition: String @constraint(maxLength: 50)
-    images: PostImagesInput
-    price: PostPriceInput
-    deliveryType: String @constraint(maxLength: 50)
-    status: String @constraint(maxLength: 20)
+    category: PostCategory
+    title: String
+    description: String
+    condition: PostCondition
+    amount: Float
+    isNegotiable: Boolean
+    deliveryType: DeliveryType
+    status: PostStatus
   }
 
   # 帖子图片输入
-  input PostImagesInput {
-    FRONT: String!
-    SIDE: String
-    BACK: String
-    DAMAGE: String
+  input PostImageInput {
+    imageUrl: String!
+    imageType: String
   }
 
-  # 帖子价格输入
-  input PostPriceInput {
-    amount: Float!
-    isFree: Boolean!
-    isNegotiable: Boolean!
+  # 添加图片输入
+  input AddPostImageInput {
+    postId: ID!
+    imageUrl: String!
+    imageType: String
+  }
+
+  # 删除图片输入
+  input DeletePostImageInput {
+    id: ID!
   }
 
   # 扩展查询
@@ -106,6 +138,17 @@ const postTypeDefs = gql`
     
     # 获取当前用户的帖子
     getMyPosts: PostListRsp!
+
+    posts(
+      category: PostCategory
+      condition: PostCondition
+      deliveryType: DeliveryType
+      status: PostStatus
+      limit: Int
+      offset: Int
+    ): [Post]
+    post(id: ID!): Post
+    userPosts(userId: ID!): [Post]
   }
 
   # 扩展变更
@@ -114,13 +157,19 @@ const postTypeDefs = gql`
     createPost(input: CreatePostInput!): PostRsp!
     
     # 更新帖子
-    updatePost(id: ID!, input: UpdatePostInput!): PostRsp!
+    updatePost(input: UpdatePostInput!): PostRsp!
     
     # 更新帖子状态
     updatePostStatus(id: ID!, status: String!): PostRsp!
     
     # 删除帖子（实际上是将状态设置为deleted）
     deletePost(id: ID!): PostRsp!
+
+    # 添加帖子图片
+    addPostImage(input: AddPostImageInput!): PostRsp!
+    
+    # 删除帖子图片
+    deletePostImage(input: DeletePostImageInput!): PostRsp!
   }
 `;
 export default postTypeDefs;

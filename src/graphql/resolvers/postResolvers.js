@@ -7,12 +7,105 @@ import {
   // 添加 Prisma 方法
   getPostsByFilterWithPrisma,
   createPostWithPrisma,
+  getPostByIdWithPrisma,
+  updatePostWithPrisma,
+  getPostsByPosterIdWithPrisma
 } from "../../models/Post.js";
 import loadEnv from "../../config/env.js";
+import { AuthenticationError, UserInputError } from 'apollo-server-express';
+import { PrismaClient } from '@prisma/client';
 
 loadEnv();
-// 是否使用 Prisma（可以通过环境变量控制）
-const USE_PRISMA = process.env.USE_PRISMA === "true";
+
+const prisma = new PrismaClient();
+
+// Helper function to map database enum values to GraphQL enum values
+const mapCategoryToGraphQL = (category) => {
+  const mapping = {
+    'Living Room Furniture': 'LIVING_ROOM_FURNITURE',
+    'Bedroom Furniture': 'BEDROOM_FURNITURE',
+    'Dining Room Furniture': 'DINING_ROOM_FURNITURE',
+    'Office Furniture': 'OFFICE_FURNITURE',
+    'Outdoor Furniture': 'OUTDOOR_FURNITURE',
+    'Storage': 'STORAGE',
+    'Other': 'OTHER'
+  };
+  return mapping[category] || category;
+};
+
+const mapConditionToGraphQL = (condition) => {
+  const mapping = {
+    'Like New': 'LIKE_NEW',
+    'Gently Used': 'GENTLY_USED',
+    'Minor Scratches': 'MINOR_SCRATCHES',
+    'Stains': 'STAINS',
+    'Needs Repair': 'NEEDS_REPAIR'
+  };
+  return mapping[condition] || condition;
+};
+
+const mapDeliveryTypeToGraphQL = (deliveryType) => {
+  const mapping = {
+    'Home Delivery': 'HOME_DELIVERY',
+    'Pickup': 'PICKUP',
+    'Both': 'BOTH'
+  };
+  return mapping[deliveryType] || deliveryType;
+};
+
+const mapStatusToGraphQL = (status) => {
+  const mapping = {
+    'active': 'ACTIVE',
+    'inactive': 'INACTIVE',
+    'sold': 'SOLD',
+    'deleted': 'DELETED'
+  };
+  return mapping[status] || status;
+};
+
+// Helper function to map GraphQL enum values to database enum values
+const mapCategoryToDB = (category) => {
+  const mapping = {
+    'LIVING_ROOM_FURNITURE': 'Living Room Furniture',
+    'BEDROOM_FURNITURE': 'Bedroom Furniture',
+    'DINING_ROOM_FURNITURE': 'Dining Room Furniture',
+    'OFFICE_FURNITURE': 'Office Furniture',
+    'OUTDOOR_FURNITURE': 'Outdoor Furniture',
+    'STORAGE': 'Storage',
+    'OTHER': 'Other'
+  };
+  return mapping[category] || category;
+};
+
+const mapConditionToDB = (condition) => {
+  const mapping = {
+    'LIKE_NEW': 'Like New',
+    'GENTLY_USED': 'Gently Used',
+    'MINOR_SCRATCHES': 'Minor Scratches',
+    'STAINS': 'Stains',
+    'NEEDS_REPAIR': 'Needs Repair'
+  };
+  return mapping[condition] || condition;
+};
+
+const mapDeliveryTypeToDB = (deliveryType) => {
+  const mapping = {
+    'HOME_DELIVERY': 'Home Delivery',
+    'PICKUP': 'Pickup',
+    'BOTH': 'Both'
+  };
+  return mapping[deliveryType] || deliveryType;
+};
+
+const mapStatusToDB = (status) => {
+  const mapping = {
+    'ACTIVE': 'active',
+    'INACTIVE': 'inactive',
+    'SOLD': 'sold',
+    'DELETED': 'deleted'
+  };
+  return mapping[status] || status;
+};
 
 // 格式化帖子数据（从数据库格式转换为GraphQL格式）
 const formatPost = (post) => {
@@ -20,10 +113,10 @@ const formatPost = (post) => {
 
   return {
     id: post.id,
-    category: post.category,
+    category: mapCategoryToGraphQL(post.category),
     title: post.title,
     description: post.description,
-    condition: post.condition,
+    condition: mapConditionToGraphQL(post.condition),
     images: {
       FRONT: post.image_front,
       SIDE: post.image_side,
@@ -35,7 +128,7 @@ const formatPost = (post) => {
       isFree: post.price_is_free,
       isNegotiable: post.price_is_negotiable,
     },
-    deliveryType: post.delivery_type,
+    deliveryType: mapDeliveryTypeToGraphQL(post.delivery_type),
     poster: {
       id: post.poster.id,
       firstName: post.poster.first_name,
@@ -47,7 +140,7 @@ const formatPost = (post) => {
       createdAt: post.poster.created_at,
       updatedAt: post.poster.updated_at,
     },
-    status: post.status,
+    status: mapStatusToGraphQL(post.status),
     createdAt: post.created_at,
     updatedAt: post.updated_at,
   };
@@ -125,10 +218,7 @@ const postResolvers = {
     // 获取所有帖子（支持过滤）
     getPostsByFilter: async (_, { filter = {} }) => {
       try {
-        // 根据配置选择使用 Prisma 或 Supabase
-        const { data: posts, error } = USE_PRISMA
-          ? await getPostsByFilterWithPrisma(filter)
-          : await getPostsByFilter(filter);
+        const { data: posts, error } = await getPostsByFilterWithPrisma(filter);
 
         if (error) {
           throw new Error(error.message);
@@ -139,7 +229,7 @@ const postResolvers = {
         console.log("formattedPosts", formattedPosts);
         return {
           code: 0,
-          msg: "获取帖子成功",
+          msg: "Posts retrieved successfully",
           data: formattedPosts,
         };
       } catch (error) {
@@ -155,7 +245,7 @@ const postResolvers = {
     // 获取单个帖子
     getPostById: async (_, { id }) => {
       try {
-        const { data: post, error } = await getPostById(id);
+        const { data: post, error } = await getPostByIdWithPrisma(id);
 
         if (error) {
           throw new Error(error.message);
@@ -183,7 +273,7 @@ const postResolvers = {
     // 获取用户的帖子
     getPostsByPosterId: async (_, { posterId }) => {
       try {
-        const { data: posts, error } = await getPostsByPosterId(posterId);
+        const { data: posts, error } = await getPostsByPosterIdWithPrisma(posterId);
 
         if (error) {
           throw new Error(error.message);
@@ -191,7 +281,7 @@ const postResolvers = {
 
         return {
           code: 0,
-          msg: "Get user posts successfully",
+          msg: "User posts retrieved successfully",
           data: posts.map((post) => formatPost(post)),
         };
       } catch (error) {
@@ -214,7 +304,7 @@ const postResolvers = {
 
         const userId = req.session.user.id;
 
-        const { data: posts, error } = await getPostsByPosterId(userId);
+        const { data: posts, error } = await getPostsByPosterIdWithPrisma(userId);
 
         if (error) {
           throw new Error(error.message);
@@ -222,7 +312,7 @@ const postResolvers = {
 
         return {
           code: 0,
-          msg: "Get my posts successfully",
+          msg: "My posts retrieved successfully",
           data: posts.map((post) => formatPost(post)),
         };
       } catch (error) {
@@ -241,9 +331,9 @@ const postResolvers = {
     createPost: async (_, { input }, { req }) => {
       try {
         // 检查用户是否已登录
-        // if (!req.session.user) {
-        //   throw new Error('Not logged in');
-        // }
+        if (!req.session.user) {
+          throw new Error('Not logged in');
+        }
 
         // 验证输入
         const validationErrors = validatePostInput(input);
@@ -255,12 +345,10 @@ const postResolvers = {
         const postData = formatPostInput(input);
 
         // 添加发布者ID和创建时间
-        // postData.poster_id = req.session.user.id;
-        postData.poster_id = "1";
+        postData.poster_id = req.session.user.id;
         postData.created_at = new Date();
         postData.status = "active";
 
-        // 根据配置选择使用 Prisma
         const { data: post, error } = await createPostWithPrisma(postData);
 
         if (error) {
@@ -269,7 +357,7 @@ const postResolvers = {
 
         return {
           code: 0,
-          msg: "Create post successfully",
+          msg: "Post created successfully",
           data: formatPost(post),
         };
       } catch (error) {
@@ -291,7 +379,7 @@ const postResolvers = {
         }
 
         // 检查帖子是否存在并且属于当前用户
-        const { data: existingPost, error: fetchError } = await getPostById(id);
+        const { data: existingPost, error: fetchError } = await getPostByIdWithPrisma(id);
 
         if (fetchError || !existingPost) {
           throw new Error("Post not found");
@@ -348,7 +436,7 @@ const postResolvers = {
         updateData.updated_at = new Date();
 
         // 更新帖子
-        const { data: updatedPost, error: updateError } = await updatePost(
+        const { data: updatedPost, error: updateError } = await updatePostWithPrisma(
           id,
           updateData
         );
@@ -359,7 +447,7 @@ const postResolvers = {
 
         return {
           code: 0,
-          msg: "Update post successfully",
+          msg: "Post updated successfully",
           data: formatPost(updatedPost),
         };
       } catch (error) {
@@ -381,7 +469,7 @@ const postResolvers = {
         }
 
         // 检查帖子是否存在并且属于当前用户
-        const { data: existingPost, error: fetchError } = await getPostById(id);
+        const { data: existingPost, error: fetchError } = await getPostByIdWithPrisma(id);
 
         if (fetchError || !existingPost) {
           throw new Error("Post not found");
@@ -392,7 +480,7 @@ const postResolvers = {
         }
 
         // 更新帖子状态
-        const { data: updatedPost, error: updateError } = await updatePost(id, {
+        const { data: updatedPost, error: updateError } = await updatePostWithPrisma(id, {
           status,
         });
 
@@ -402,7 +490,7 @@ const postResolvers = {
 
         return {
           code: 0,
-          msg: "Update post status successfully",
+          msg: "Post status updated successfully",
           data: formatPost(updatedPost),
         };
       } catch (error) {
@@ -424,7 +512,7 @@ const postResolvers = {
         }
 
         // 检查帖子是否存在并且属于当前用户
-        const { data: existingPost, error: fetchError } = await getPostById(id);
+        const { data: existingPost, error: fetchError } = await getPostByIdWithPrisma(id);
 
         if (fetchError || !existingPost) {
           throw new Error("Post not found");
@@ -435,7 +523,7 @@ const postResolvers = {
         }
 
         // 将帖子状态设置为deleted
-        const { data: deletedPost, error: updateError } = await updatePost(id, {
+        const { data: deletedPost, error: updateError } = await updatePostWithPrisma(id, {
           status: "deleted",
         });
 
@@ -445,7 +533,7 @@ const postResolvers = {
 
         return {
           code: 0,
-          msg: "删除帖子成功",
+          msg: "Post deleted successfully",
           data: formatPost(deletedPost),
         };
       } catch (error) {

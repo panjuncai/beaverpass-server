@@ -1,43 +1,42 @@
-import supabase from './supabase.js';
-import redis from 'redis';
+import { createClient } from 'redis';
+import prisma from '../lib/prisma.js';
 import loadEnv from './env.js';
 loadEnv();
 
-// 检查是否使用 Prisma
-const USE_PRISMA = process.env.USE_PRISMA === 'true';
 
-const connectSupabase = async () => {
-  // 如果使用 Prisma，则跳过 Supabase 连接测试
-  if (USE_PRISMA) {
-    console.log("使用 Prisma 模式，跳过 Supabase 连接测试");
-    return;
-  }
-  
+
+// Connect to Redis
+export async function connectRedis() {
   try {
-    // 测试 Supabase 连接
-    const { data, error } = await supabase.from('users').select('count').limit(1);
-    
-    if (error) {
-      throw error;
-    }
-    
-    console.log("Supabase 连接成功");
-  } catch (e) {
-    console.error("Supabase 连接错误:", e);
-    process.exit(1);
+    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    const client = createClient({
+      url: redisUrl
+    });
+
+    client.on('error', (err) => {
+      console.error('Redis 客户端错误:', err);
+    });
+
+    await client.connect();
+    console.log('✅ Redis 连接成功');
+    return client;
+  } catch (error) {
+    console.error('❌ Redis 连接错误:', error);
+    throw error;
   }
-};
-
-const redisClient = redis.createClient();
-const connectRedis = async () => {
-  // 初始化 redis 客户端
-  redisClient.on("connect", () => console.log("Redis 连接成功"));
-  redisClient.connect(); // v4 redis should connect
 }
 
-const connectDB = async () => {
-  await connectSupabase();
-  await connectRedis();
+// Connect to PostgreSQL via Prisma
+export async function connectDB() {
+  try {
+    await prisma.$connect();
+    console.log('✅ 数据库通过 Prisma 连接成功');
+    return prisma;
+  } catch (error) {
+    console.error('❌ 数据库连接错误:', error);
+    throw error;
+  }
 }
 
-export {connectDB,redisClient};
+// Export Prisma client for use in other modules
+export { prisma };

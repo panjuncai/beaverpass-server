@@ -16,11 +16,6 @@ BeaverPass Server 是一个基于 Node.js 和 GraphQL 的后端服务，提供�
      - `DATABASE_URL`: 数据库连接 URL
      - `SESSION_SECRET`: 会话密钥
      - `NODE_ENV`: 运行环境 (development/production)
-     - `SUPABASE_URL`: Supabase 项目 URL (如果不使用 Prisma)
-     - `SUPABASE_KEY`: Supabase API 密钥 (如果不使用 Prisma)
-   
-   - 数据库选择：
-     - `USE_PRISMA`: 设置为 "true" 使用 Prisma，"false" 使用 Supabase
 
 3. 运行环境变量检查脚本确保所有必需的环境变量都已设置：
    ```bash
@@ -83,6 +78,4 @@ beaverpass-server/
 如果遇到与环境变量相关的错误，请确保：
 
 1. 所有必需的环境变量都已正确设置
-2. 如果使用 Supabase，确保 `SUPABASE_URL` 和 `SUPABASE_KEY` 已设置
-3. 如果使用 Prisma，确保 `USE_PRISMA` 设置为 "true"
-4. 数据库连接 URL 格式正确且可访问 
+2. 数据库连接 URL 格式正确且可访问 

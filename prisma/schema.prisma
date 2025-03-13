@@ -9,51 +9,60 @@ datasource db {
 }
 
 model User {
-  id                             String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  email                          String                @unique
-  firstName                      String                @map("first_name")
-  lastName                       String                @map("last_name")
-  avatar                         String?
-  address                        String?
-  phone                          String?
-  password                       String
-  isVerified                     Boolean?              @default(false) @map("is_verified")
-  verificationToken              String?               @map("verification_token")
-  createdAt                      DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt                      DateTime?             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  chatRooms                      ChatRoomParticipant[]
-  readMessages                   MessageReadBy[]
-  sentMessages                   Message[]             @relation("SentMessages")
-  orders_orders_buyer_idTousers  orders[]              @relation("orders_buyer_idTousers")
-  orders_orders_seller_idTousers orders[]              @relation("orders_seller_idTousers")
-  posts                          Post[]
+  id                String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email             String                @unique
+  firstName         String                @map("first_name")
+  lastName          String                @map("last_name")
+  avatar            String?
+  address           String?
+  phone             String?
+  password          String
+  isVerified        Boolean?              @default(false) @map("is_verified")
+  verificationToken String?               @map("verification_token")
+  createdAt         DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  chatRooms         ChatRoomParticipant[]
+  readMessages      MessageReadBy[]
+  sentMessages      Message[]             @relation("SentMessages")
+  buyerOrders       Order[]               @relation("BuyerOrders")
+  sellerOrders      Order[]               @relation("SellerOrders")
+  posts             Post[]
 
   @@map("users")
 }
 
 model Post {
-  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  category          String              @db.VarChar(50)
-  title             String
-  description       String
-  condition         String              @db.VarChar(50)
-  imageFront        String              @map("image_front")
-  imageSide         String?             @map("image_side")
-  imageBack         String?             @map("image_back")
-  imageDamage       String?             @map("image_damage")
-  priceAmount       Decimal?            @map("price_amount") @db.Decimal
-  priceIsFree       Boolean?            @default(false) @map("price_is_free")
-  priceIsNegotiable Boolean?            @default(false) @map("price_is_negotiable")
-  deliveryType      String              @map("delivery_type") @db.VarChar(50)
-  posterId          String?             @map("poster_id") @db.Uuid
-  status            String?             @default("active") @db.VarChar(20)
-  createdAt         DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  messages          Message[]
-  orders            orders[]
-  poster            User?               @relation(fields: [posterId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id           String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  category     post_category_enum
+  title        String
+  description  String
+  condition    post_condition_enum
+  amount       Decimal             @default(0) @db.Decimal(12, 2)
+  isNegotiable Boolean?            @default(false) @map("is_negotiable")
+  deliveryType delivery_type_enum  @map("delivery_type")
+  posterId     String?             @map("poster_id") @db.Uuid
+  status       post_status_enum?   @default(active)
+  createdAt    DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  messages     Message[]
+  orders       Order[]
+  images       PostImage[]
+  poster       User?               @relation(fields: [posterId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@index([posterId], map: "idx_posts_poster_id")
   @@map("posts")
+}
+
+model PostImage {
+  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  postId    String    @map("post_id") @db.Uuid
+  imageUrl  String    @map("image_url")
+  imageType String?   @map("image_type")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([postId], map: "idx_post_images_post_id")
+  @@map("post_images")
 }
 
 model ChatRoom {
@@ -66,11 +75,10 @@ model ChatRoom {
 }
 
 model ChatRoomParticipant {
-  chatRoomId  String   @map("chat_room_id") @db.Uuid
-  userId      String   @map("user_id") @db.Uuid
-  unreadCount Int?     @default(0) @map("unread_count")
-  chatRoom    ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  chatRoomId String   @map("chat_room_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([chatRoomId, userId])
   @@map("chat_room_participants")
@@ -78,18 +86,20 @@ model ChatRoomParticipant {
 
 model Message {
   id          String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  roomId      String?            @map("room_id") @db.Uuid
+  chatRoomId  String             @map("chat_room_id") @db.Uuid
   senderId    String?            @map("sender_id") @db.Uuid
   content     String?
   postId      String?            @map("post_id") @db.Uuid
-  messageType String?            @default("text") @map("message_type") @db.VarChar(20)
+  messageType message_type_enum? @default(text) @map("message_type")
   createdAt   DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   readBy      MessageReadBy[]
+  chatRoom    ChatRoom           @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   post        Post?              @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  room        ChatRoom?          @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   sender      User?              @relation("SentMessages", fields: [senderId], references: [id], onUpdate: NoAction)
 
+  @@index([chatRoomId], map: "idx_messages_chat_room_id")
+  @@index([senderId], map: "idx_messages_sender_id")
   @@map("messages")
 }
 
@@ -104,31 +114,75 @@ model MessageReadBy {
   @@map("message_read_by")
 }
 
-model orders {
-  id                            String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  buyer_id                      String             @db.Uuid
-  seller_id                     String             @db.Uuid
-  post_id                       String             @db.Uuid
-  title                         String
-  price                         Decimal            @db.Decimal(12, 2)
-  image_front                   String
-  image_back                    String?
-  image_left                    String?
-  image_right                   String?
-  shipping_address              String
-  shipping_receiver             String
-  shipping_phone                String
-  payment_method                String
-  payment_transaction_id        String?
-  payment_fee                   Decimal?           @default(0) @db.Decimal(12, 2)
-  delivery_fee                  Decimal?           @default(0) @db.Decimal(12, 2)
-  service_fee                   Decimal?           @default(0) @db.Decimal(12, 2)
-  tax                           Decimal?           @default(0) @db.Decimal(12, 2)
-  total                         Decimal            @db.Decimal(12, 2)
-  status                        String?            @default("pending_payment") @db.VarChar(20)
-  created_at                    DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_at                    DateTime?          @default(now()) @db.Timestamptz(6)
-  users_orders_buyer_idTousers  User               @relation("orders_buyer_idTousers", fields: [buyer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  posts                         Post               @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_orders_seller_idTousers User               @relation("orders_seller_idTousers", fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model Order {
+  id                   String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  buyerId              String             @map("buyer_id") @db.Uuid
+  sellerId             String             @map("seller_id") @db.Uuid
+  postId               String             @map("post_id") @db.Uuid
+  shippingAddress      String             @map("shipping_address")
+  shippingReceiver     String             @map("shipping_receiver")
+  shippingPhone        String             @map("shipping_phone")
+  paymentMethod        String             @map("payment_method")
+  paymentTransactionId String?            @map("payment_transaction_id")
+  paymentFee           Decimal?           @default(0) @map("payment_fee") @db.Decimal(12, 2)
+  deliveryFee          Decimal?           @default(0) @map("delivery_fee") @db.Decimal(12, 2)
+  serviceFee           Decimal?           @default(0) @map("service_fee") @db.Decimal(12, 2)
+  tax                  Decimal?           @default(0) @map("tax") @db.Decimal(12, 2)
+  total                Decimal            @map("total") @db.Decimal(12, 2)
+  status               order_status_enum? @default(pending_payment)
+  createdAt            DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  buyer                User               @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  post                 Post               @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  seller               User               @relation("SellerOrders", fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([buyerId], map: "idx_orders_buyer_id")
+  @@index([sellerId], map: "idx_orders_seller_id")
+  @@map("orders")
+}
+
+enum delivery_type_enum {
+  Home_Delivery @map("Home Delivery")
+  Pickup
+  Both
+}
+
+enum message_type_enum {
+  text
+  image
+  post
+}
+
+enum order_status_enum {
+  pending_payment
+  paid
+  shipped
+  completed
+  canceled
+  refunded
+}
+
+enum post_category_enum {
+  Living_Room_Furniture @map("Living Room Furniture")
+  Bedroom_Furniture     @map("Bedroom Furniture")
+  Dining_Room_Furniture @map("Dining Room Furniture")
+  Office_Furniture      @map("Office Furniture")
+  Outdoor_Furniture     @map("Outdoor Furniture")
+  Storage
+  Other
+}
+
+enum post_condition_enum {
+  Like_New        @map("Like New")
+  Gently_Used     @map("Gently Used")
+  Minor_Scratches @map("Minor Scratches")
+  Stains
+  Needs_Repair    @map("Needs Repair")
+}
+
+enum post_status_enum {
+  active
+  inactive
+  sold
+  deleted
 }

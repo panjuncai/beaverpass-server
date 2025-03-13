@@ -24,7 +24,6 @@
     "@aws-sdk/client-s3": "^3.758.0",
     "@aws-sdk/s3-request-presigner": "^3.758.0",
     "@prisma/client": "^6.4.1",
-    "@supabase/supabase-js": "^2.49.1",
     "apollo-server-express": "^3.13.0",
     "bcryptjs": "^2.4.3",
     "connect-redis": "^8.0.1",
@@ -35,9 +34,6 @@
     "graphql": "^16.10.0",
     "graphql-constraint-directive": "^6.0.0",
     "graphql-middleware": "^6.1.35",
-    "graphql-subscriptions": "^3.0.0",
-    "graphql-ws": "^6.0.4",
-    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mongoose": "^8.9.4",
@@ -46,10 +42,7 @@
     "pg-hstore": "^2.3.4",
     "redis": "^4.7.0",
     "sequelize": "^6.37.6",
-    "socket.io": "^4.8.1",
-    "stripe": "^17.7.0",
-    "subscriptions-transport-ws": "^0.11.0",
-    "ws": "^8.18.1"
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

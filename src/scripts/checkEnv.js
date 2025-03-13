@@ -16,24 +16,54 @@ loadEnv();
 
 // 定义环境变量检查配置
 const ENV_CONFIG = {
-  // 必需的环境变量及其描述
-  required: {
-    'DATABASE_URL': '数据库连接URL',
-    'SESSION_SECRET': '会话密钥',
-    'NODE_ENV': '运行环境 (development/production)',
-    'SUPABASE_URL': 'Supabase项目URL',
-    'SUPABASE_KEY': 'Supabase API密钥'
+  // 数据库连接配置
+  database: {
+    required: {
+      'DATABASE_URL': 'PostgreSQL数据库连接URL（通过连接池）'
+    },
+    recommended: {
+      'DIRECT_URL': '数据库直连URL（用于数据库迁移）',
+      'MONGODB_URI': 'MongoDB连接URI（备用数据库）'
+    }
   },
   
-  // 可选但推荐的环境变量及其描述
-  recommended: {
-    'PORT': '服务器端口号',
-    'DIRECT_URL': '直接数据库连接URL（用于Prisma）',
-    'AWS_REGION': 'AWS区域',
-    'AWS_ACCESS_KEY_ID': 'AWS访问密钥ID',
-    'AWS_SECRET_ACCESS_KEY': 'AWS秘密访问密钥',
-    'AWS_S3_BUCKET_NAME': 'S3存储桶名称',
-    'USE_PRISMA': '是否使用Prisma (true/false)'
+  // 应用程序配置
+  application: {
+    required: {
+      'NODE_ENV': '应用环境（development/production/test）'
+    },
+    recommended: {
+      'BASE_URI': '前端基础URL'
+    }
+  },
+  
+  // 安全与认证
+  security: {
+    required: {
+      'SESSION_SECRET': '会话密钥'
+    },
+    recommended: {
+      'SECRET_KEY_VERIFY': '邮箱验证密钥',
+      'SECRET_KEY_JWT': 'JWT认证密钥'
+    }
+  },
+  
+  // 第三方服务配置
+  thirdParty: {
+    recommended: {
+      'AWS_ACCESS_KEY_ID': 'AWS访问密钥ID',
+      'AWS_SECRET_ACCESS_KEY': 'AWS秘密访问密钥',
+      'AWS_REGION': 'AWS区域',
+      'AWS_S3_BUCKET_NAME': 'S3存储桶名称'
+    }
+  },
+  
+  // 服务器配置
+  server: {
+    recommended: {
+      'PORT': '服务器端口（默认4001）',
+      'REDIS_URL': 'Redis配置（用于会话存储）'
+    }
   },
   
   // 特定环境的环境变量
@@ -83,11 +113,38 @@ function checkVars(vars, isRequired = false) {
 function main() {
   console.log('\n======== 环境变量检查 ========');
   console.log('当前环境:', process.env.NODE_ENV || 'development');
-  console.log('\n--- 必需的环境变量 ---');
-  const requiredCheck = checkVars(ENV_CONFIG.required, true);
+  console.log('使用 Prisma ORM 进行数据库操作');
   
-  console.log('\n--- 推荐的环境变量 ---');
-  checkVars(ENV_CONFIG.recommended);
+  // 收集所有必需的环境变量
+  const allRequired = {};
+  const allRecommended = {};
+  
+  // 处理每个分类
+  const categories = ['database', 'application', 'security', 'thirdParty', 'server'];
+  let requiredCheck = true;
+  
+  for (const category of categories) {
+    const categoryConfig = ENV_CONFIG[category];
+    
+    if (categoryConfig.required) {
+      Object.assign(allRequired, categoryConfig.required);
+    }
+    
+    if (categoryConfig.recommended) {
+      Object.assign(allRecommended, categoryConfig.recommended);
+    }
+    
+    console.log(`\n--- ${getCategoryTitle(category)} ---`);
+    
+    if (categoryConfig.required) {
+      const categoryRequiredCheck = checkVars(categoryConfig.required, true);
+      requiredCheck = requiredCheck && categoryRequiredCheck;
+    }
+    
+    if (categoryConfig.recommended) {
+      checkVars(categoryConfig.recommended, false);
+    }
+  }
   
   // 检查特定环境的环境变量
   const currentEnv = process.env.NODE_ENV || 'development';
@@ -106,6 +163,23 @@ function main() {
   console.log('==============================\n');
   
   return requiredCheck;
+}
+
+/**
+ * 获取分类的中文标题
+ * @param {string} category - 分类名称
+ * @returns {string} 分类的中文标题
+ */
+function getCategoryTitle(category) {
+  const titles = {
+    database: '数据库连接配置',
+    application: '应用程序配置',
+    security: '安全与认证',
+    thirdParty: '第三方服务配置',
+    server: '服务器配置'
+  };
+  
+  return titles[category] || category;
 }
 
 // 运行主函数

@@ -1,20 +1,20 @@
-import authResolvers from './authResolvers.js';
-import postResolvers from './postResolvers.js';
-import uploadResolvers from './uploadResolvers.js';
-import orderResolvers from './orderResolvers.js';
-import { GraphQLScalarType, Kind } from 'graphql';
+const userResolvers = require('./userResolvers');
+const postResolvers = require('./postResolvers');
+const chatResolvers = require('./chatResolvers');
+const orderResolvers = require('./orderResolvers');
+const { GraphQLScalarType, Kind } = require('graphql');
 
-// 创建自定义 DateTime 标量类型
+// Create custom DateTime scalar type
 const DateTime = new GraphQLScalarType({
   name: 'DateTime',
-  description: '日期时间标量类型,ISO-8601 格式的字符串',
+  description: 'Date time scalar type, ISO-8601 format string',
   
-  // 从 GraphQL 值转换为 JavaScript 日期对象
+  // Convert from GraphQL value to JavaScript Date object
   parseValue(value) {
     return new Date(value);
   },
   
-  // 从 AST 转换为 JavaScript 日期对象
+  // Convert from AST to JavaScript Date object
   parseLiteral(ast) {
     if (ast.kind === Kind.STRING) {
       return new Date(ast.value);
@@ -22,34 +22,35 @@ const DateTime = new GraphQLScalarType({
     return null;
   },
   
-  // 从 JavaScript 日期对象转换为 GraphQL 值
+  // Convert from JavaScript Date object to GraphQL value
   serialize(value) {
     return value instanceof Date ? value.toISOString() : null;
   }
 });
 
-// 合并所有解析器
+// Merge all resolvers
 const resolvers = {
-  // 自定义标量类型解析器
+  // Custom scalar type resolver
   DateTime,
   
   Query: {
-    ...authResolvers.Query,
+    ...userResolvers.Query,
     ...postResolvers.Query,
-    ...uploadResolvers.Query,
+    ...chatResolvers.Query,
     ...orderResolvers.Query
   },
   Mutation: {
-    ...authResolvers.Mutation,
+    ...userResolvers.Mutation,
     ...postResolvers.Mutation,
-    ...uploadResolvers.Mutation,
+    ...chatResolvers.Mutation,
     ...orderResolvers.Mutation
   },
-  Subscription: {
-    ...orderResolvers.Subscription
-  },
-  // 添加订单字段解析器
+  User: userResolvers.User,
+  Post: postResolvers.Post,
+  ChatRoom: chatResolvers.ChatRoom,
+  Message: chatResolvers.Message,
+  MessageReadBy: chatResolvers.MessageReadBy,
   Order: orderResolvers.Order
 };
 
-export default resolvers;
+module.exports = resolvers;

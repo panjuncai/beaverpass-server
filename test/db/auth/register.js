@@ -4,8 +4,7 @@
  * 这个示例展示了如何使用 Prisma 创建新用户
  * 
  * 运行方式：
- * 1. 确保已设置环境变量 USE_PRISMA=true
- * 2. 执行 node examples/auth/register.js
+ * 1. 执行 node test/db/auth/register.js
  */
 
 import { createUserWithPrisma } from '../../src/models/User.js';
