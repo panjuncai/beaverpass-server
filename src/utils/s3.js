@@ -1,12 +1,9 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import loadEnv from '../config/env.js';
-// 确保环境变量已加载
-loadEnv();
 
 // 创建 S3 客户端，指定区域及凭证
 const s3Client = new S3Client({
-  region: "us-east-2",
+  region: process.env.AWS_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID, // 从环境变量读取
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -20,7 +17,7 @@ const generatePresignedUrl = async (fileName, fileType) => {
     const uniqueFileName = `${Date.now()}-${fileName}`;
     
     const params = {
-      Bucket: "beaverpassbucket",
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: uniqueFileName,
       ContentType: fileType,
     };

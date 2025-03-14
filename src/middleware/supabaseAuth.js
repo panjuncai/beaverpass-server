@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import supabase from '../config/supabase.js';
-import { prisma } from '../config/db.js';
 
 /**
  * 验证 Supabase JWT 令牌
@@ -9,34 +8,36 @@ import { prisma } from '../config/db.js';
  */
 export const verifySupabaseToken = async (token) => {
   try {
-    if (!token) return null;
+    if (!token) {
+      console.log('🔍 令牌验证: 未提供令牌');
+      return null;
+    }
 
-    // 从 Supabase 获取 JWT 密钥
-    const { data: { publicKey } } = await supabase.rpc('get_jwt_public_key');
+    console.log('🔍 令牌验证: 开始验证令牌');
+    console.log(`🔍 令牌前20个字符: ${token.substring(0, 20)}...`);
+
+    // 方法1: 使用 Supabase Auth API 直接验证令牌
+    console.log('🔍 令牌验证: 使用 Supabase Auth API 验证令牌...');
     
-    // 验证令牌
-    const decoded = jwt.verify(token, publicKey, {
-      algorithms: ['RS256']
-    });
+    // 设置 Supabase 客户端的会话
+    const { data: { user }, error } = await supabase.auth.getUser(token);
     
-    // 如果令牌有效，返回用户信息
-    if (decoded && decoded.sub) {
-      // 从数据库获取用户信息
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.sub }
-      });
-      
-      if (!user) {
-        console.error('User not found in database');
-        return null;
-      }
-      
-      return user;
+    if (error) {
+      console.error('🚫 令牌验证失败:', error);
+      return null;
     }
     
-    return null;
+    if (!user) {
+      console.log('🚫 令牌有效但未找到用户');
+      return null;
+    }
+    
+    console.log('✅ 令牌验证成功');
+    console.log('🔍 用户信息:', JSON.stringify(user, null, 2));
+    
+    return user;
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error('🚫 令牌验证错误:', error);
     return null;
   }
 };
@@ -85,11 +86,11 @@ const supabaseAuth = async (req, res, next) => {
       return next();
     } catch (error) {
       // 无效令牌
-      console.error('Invalid token:', error);
+      console.error('🚫 无效令牌:', error);
       return next();
     }
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    console.error('🚫 身份验证中间件错误:', error);
     return next();
   }
 };

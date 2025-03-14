@@ -12,6 +12,7 @@ import { createServer } from "http";
 // 自定义核心模块
 import { createApolloServer } from "./graphql/index.js";
 import supabaseAuth from "./middleware/supabaseAuth.js";
+// import { connectDB } from "./config/db.js";
 
 // 设置端口
 const PORT = process.env.PORT || 4001;
@@ -26,8 +27,8 @@ function checkEnvironmentVariables() {
   // 检查必要的环境变量
   const requiredVars = [
     'DATABASE_URL',
-    'SUPABASE_URL',     // 添加 Supabase URL
-    'SUPABASE_SERVICE_KEY', // 添加 Supabase 服务密钥
+    'SUPABASE_URL',
+    'SUPABASE_SERVICE_KEY',
     'NODE_ENV'
   ];
   
@@ -67,14 +68,14 @@ function checkEnvironmentVariables() {
         console.log(`✅ ${varName}: ${process.env[varName]}`);
       }
     } else {
-      console.log(`⚠️ ${varName}: 未设置`);
+      console.log(`❌ ${varName}: 未设置`);
     }
   }
   
   console.log('\n当前环境:', process.env.NODE_ENV || 'development');
   
   if (missingRequired) {
-    console.log('\n⚠️ 警告: 一些必要的环境变量未设置，这可能导致应用程序无法正常工作。');
+    console.log('\n❌ 警告: 一些必要的环境变量未设置，这可能导致应用程序无法正常工作。');
   } else {
     console.log('\n✅ 所有必要的环境变量已设置。');
   }
@@ -126,6 +127,9 @@ async function startServer() {
       console.log(`收到请求: ${req.method} ${req.url}`);
       next();
     });
+
+    // 连接数据库
+    //await connectDB();
 
     // 创建 Apollo Server
     const apolloServer = createApolloServer();

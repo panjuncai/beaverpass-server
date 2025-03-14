@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node -r dotenv/config src/index.js",
-    "dev": "DOTENV_CONFIG_PATH=.env.development nodemon -r dotenv/config src/index.js",
+    "dev": "DOTENV_CONFIG_PATH=.env nodemon -r dotenv/config src/index.js",
     "windev": "cross-env DOTENV_CONFIG_PATH=development nodemon -r dotenv/config src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prisma:generate": "prisma generate",

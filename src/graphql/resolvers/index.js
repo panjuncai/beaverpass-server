@@ -1,5 +1,7 @@
 import userResolvers from './userResolvers.js';
 import chatResolvers from './chatResolvers.js';
+import orderResolvers from './orderResolvers.js';
+import postResolvers from './postResolvers.js';
 import { GraphQLScalarType, Kind } from 'graphql';
 
 // Create custom DateTime scalar type
@@ -33,11 +35,15 @@ const resolvers = {
   
   Query: {
     ...userResolvers.Query,
-    ...chatResolvers.Query
+    ...chatResolvers.Query,
+    ...postResolvers.Query,
+    ...orderResolvers.Query
   },
   Mutation: {
     ...userResolvers.Mutation,
-    ...chatResolvers.Mutation
+    ...chatResolvers.Mutation,
+    ...postResolvers.Mutation,
+    ...orderResolvers.Mutation
   }
 };
 

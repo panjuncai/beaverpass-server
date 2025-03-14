@@ -6,13 +6,6 @@ import {
   updatePostWithPrisma,
   getPostsByPosterIdWithPrisma
 } from "../../models/Post.js";
-import loadEnv from "../../config/env.js";
-import { AuthenticationError, UserInputError } from 'apollo-server-express';
-import { PrismaClient } from '@prisma/client';
-
-loadEnv();
-
-const prisma = new PrismaClient();
 
 // Helper function to map database enum values to GraphQL enum values
 const mapCategoryToGraphQL = (category) => {

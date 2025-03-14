@@ -13,14 +13,6 @@ export default gql`
     updatedAt: String
   }
 
-  # 用户响应类型
-  type UserResponse {
-    code: Int!
-    success: Boolean!
-    message: String!
-    user: User
-  }
-
   # 更新用户输入类型
   input UpdateUserInput {
     firstName: String
@@ -34,11 +26,10 @@ export default gql`
   extend type Query {
     me: User
     user(id: ID!): User
-    users: [User!]!
   }
 
   # 变更
   extend type Mutation {
-    updateUser(input: UpdateUserInput!): UserResponse!
+    updateUser(input: UpdateUserInput!): User
   }
 `; 
