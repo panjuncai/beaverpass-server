@@ -6,15 +6,12 @@ loadEnv();
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import session from "express-session";
-import { RedisStore } from "connect-redis";
 import { PrismaClient } from "@prisma/client";
 import { createServer } from "http";
 
 // 自定义核心模块
 import { createApolloServer } from "./graphql/index.js";
-import { connectRedis } from "./config/db.js";
-import auth from "./middlewares/authMiddleware.js";
+import supabaseAuth from "./middleware/supabaseAuth.js";
 
 // 设置端口
 const PORT = process.env.PORT || 4001;
@@ -29,7 +26,8 @@ function checkEnvironmentVariables() {
   // 检查必要的环境变量
   const requiredVars = [
     'DATABASE_URL',
-    'SESSION_SECRET',
+    'SUPABASE_URL',     // 添加 Supabase URL
+    'SUPABASE_SERVICE_KEY', // 添加 Supabase 服务密钥
     'NODE_ENV'
   ];
   
@@ -94,9 +92,6 @@ async function startServer() {
       console.warn('环境变量检查未通过，但尝试继续启动服务器...');
     }
 
-    // 连接 Redis
-    const redisClient = await connectRedis();
-
     // 初始化 express 应用
     const app = express();
     
@@ -123,29 +118,8 @@ async function startServer() {
     app.use(bodyParser.json({ limit: "10mb" }));
     app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
 
-    // 设置 session 中间件
-    app.use(
-      session({
-        store: new RedisStore({
-          client: redisClient,
-          prefix: "beaverpass:", // Redis key 前缀，避免冲突
-        }),
-        name: "sessionId", // 自定义 cookie 名称，增加安全性
-        secret: process.env.SESSION_SECRET, // 使用专门的 session secret
-        resave: false, // 如果 session 没有修改，不重新保存
-        saveUninitialized: false, // 不保存未初始化的 session
-        rolling: true, // 每次请求都刷新 cookie 过期时间
-        cookie: {
-          httpOnly: true, // 防止客户端 JS 访问 cookie
-          // secure: process.env.NODE_ENV === 'production', // 生产环境强制使用 HTTPS
-          sameSite: "lax", // 防止 CSRF 攻击
-          maxAge: 1000 * 60 * 60 * 24, //  24h
-        },
-      })
-    );
-
-    // 设置 auth 中间件
-    app.use(auth);
+    // 设置 Supabase 身份验证中间件
+    app.use(supabaseAuth);
 
     // 设置请求日志中间件
     app.use((req, _, next) => {
@@ -177,9 +151,6 @@ async function startServer() {
       
       // 断开 Prisma 连接
       await prisma.$disconnect();
-      
-      // 关闭 Redis 连接
-      await redisClient.quit();
       
       // 关闭 HTTP 服务器
       httpServer.close(() => {

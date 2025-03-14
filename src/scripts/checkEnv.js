@@ -40,7 +40,8 @@ const ENV_CONFIG = {
   // 安全与认证
   security: {
     required: {
-      'SESSION_SECRET': '会话密钥'
+      'SUPABASE_URL': 'Supabase项目URL',
+      'SUPABASE_SERVICE_KEY': 'Supabase服务密钥'
     },
     recommended: {
       'SECRET_KEY_VERIFY': '邮箱验证密钥',
@@ -61,8 +62,7 @@ const ENV_CONFIG = {
   // 服务器配置
   server: {
     recommended: {
-      'PORT': '服务器端口（默认4001）',
-      'REDIS_URL': 'Redis配置（用于会话存储）'
+      'PORT': '服务器端口（默认4001）'
     }
   },
   
@@ -114,6 +114,7 @@ function main() {
   console.log('\n======== 环境变量检查 ========');
   console.log('当前环境:', process.env.NODE_ENV || 'development');
   console.log('使用 Prisma ORM 进行数据库操作');
+  console.log('使用 Supabase 进行身份验证');
   
   // 收集所有必需的环境变量
   const allRequired = {};

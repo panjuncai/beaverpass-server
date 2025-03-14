@@ -21,6 +21,11 @@ schema = constraintDirective()(schema);
 
 // Context function for HTTP requests
 const context = async ({ req }) => {
+  // 如果请求中已经有用户信息（通过中间件设置），则直接使用
+  if (req.user) {
+    return { user: req.user, prisma, supabase };
+  }
+  
   // 获取请求头中的 JWT 令牌
   const token = extractTokenFromRequest(req);
   
