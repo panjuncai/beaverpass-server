@@ -15,7 +15,7 @@
     "setup-env": "node src/scripts/setupEnv.js",
     "prestart": "npm run check-env",
     "predev": "npm run check-env",
-    "vercel-build": "npx prisma generate && npx prisma migrate deploy"
+    "vercel-build": "npx prisma generate"
   },
   "keywords": [],
   "type": "module",
@@ -43,6 +43,7 @@
     "nodemailer": "^6.9.16",
     "pg": "^8.13.3",
     "pg-hstore": "^2.3.4",
+    "prisma": "^6.4.1",
     "sequelize": "^6.37.6",
     "stripe": "^17.7.0"
   },

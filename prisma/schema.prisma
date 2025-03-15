@@ -46,7 +46,7 @@ model Post {
   messages     Message[]
   orders       Order[]
   images       PostImage[]
-  poster       User?     @relation(fields: [posterId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  poster       User?     @relation(fields: [posterId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([posterId], map: "idx_posts_poster_id")
   @@map("posts")
@@ -58,7 +58,7 @@ model PostImage {
   imageUrl  String    @map("image_url")
   imageType String?   @map("image_type")
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([postId], map: "idx_post_images_post_id")
   @@map("post_images")
@@ -79,8 +79,8 @@ model ChatRoomParticipant {
   userId     String    @map("user_id") @db.Uuid
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@id([chatRoomId, userId])
   @@map("chat_room_participants")
@@ -96,9 +96,9 @@ model Message {
   createdAt   DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime?  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   readBy      MessageReadBy[]
-  chatRoom    ChatRoom   @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  post        Post?      @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sender      User?      @relation("SentMessages", fields: [senderId], references: [id], onUpdate: NoAction)
+  chatRoom    ChatRoom   @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  post        Post?      @relation(fields: [postId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  sender      User?      @relation("SentMessages", fields: [senderId], references: [id], onUpdate: Restrict)
 
   @@index([chatRoomId], map: "idx_messages_chat_room_id")
   @@index([senderId], map: "idx_messages_sender_id")
@@ -109,8 +109,8 @@ model MessageReadBy {
   messageId String    @map("message_id") @db.Uuid
   userId    String    @map("user_id") @db.Uuid
   readAt    DateTime? @default(now()) @map("read_at") @db.Timestamptz(6)
-  message   Message   @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  message   Message   @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@id([messageId, userId])
   @@map("message_read_by")
@@ -134,9 +134,9 @@ model Order {
   status               String?    @default("PENDING_PAYMENT")
   createdAt            DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime?  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  buyer                User       @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  post                 Post       @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  seller               User       @relation("SellerOrders", fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  buyer                User       @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  post                 Post       @relation(fields: [postId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  seller               User       @relation("SellerOrders", fields: [sellerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@index([buyerId], map: "idx_orders_buyer_id")
   @@index([sellerId], map: "idx_orders_seller_id")
