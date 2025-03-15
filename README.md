@@ -71,7 +71,7 @@ beaverpass-server/
 
 ## 其他文档
 
-- [订单系统文档](./README-orders.md)
+- [ 架构迁移说明](./docs/架构迁移说明.md)
 
 ## 故障排除
 
