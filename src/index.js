@@ -12,7 +12,7 @@ import { createServer } from "http";
 // 自定义核心模块
 import { createApolloServer } from "./graphql/index.js";
 import supabaseAuth from "./middleware/supabaseAuth.js";
-// import { connectDB } from "./config/db.js";
+import { connectDB } from "./config/db.js";
 
 // 设置端口
 const PORT = process.env.PORT || 4001;
@@ -129,7 +129,7 @@ async function startServer() {
     });
 
     // 连接数据库
-    //await connectDB();
+    await connectDB();
 
     // 创建 Apollo Server
     const apolloServer = createApolloServer();

@@ -7,7 +7,7 @@
  * 2. 执行 node test/db/auth/login.js
  */
 
-import { getUserByEmailWithPrisma } from '../../../src/models/User.js';
+import { getUserByEmail } from '../../../src/models/UserModel.js';
 import bcrypt from 'bcryptjs';
 
 // 加载环境变量
@@ -25,7 +25,7 @@ async function loginUser(email, password) {
     console.log(`尝试登录用户: ${email}`);
     
     // 通过邮箱查找用户
-    const { data: user, error } = await getUserByEmailWithPrisma(email);
+    const { data: user, error } = await getUserByEmail(email);
     
     if (error) {
       console.error('查询用户失败:', error);

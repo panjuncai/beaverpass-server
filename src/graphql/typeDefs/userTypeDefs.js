@@ -11,6 +11,9 @@ export default gql`
     phone: String
     createdAt: String
     updatedAt: String
+    posts: [Post]
+    buyerOrders: [Order]
+    sellerOrders: [Order]
   }
 
   # 更新用户输入类型

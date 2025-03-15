@@ -1,14 +1,6 @@
 import { gql } from 'apollo-server-express';
 
 export default gql`
-  enum OrderStatus {
-    PENDING_PAYMENT
-    PAID
-    SHIPPED
-    COMPLETED
-    CANCELED
-    REFUNDED
-  }
 
   type Order {
     id: ID!
@@ -27,7 +19,7 @@ export default gql`
     serviceFee: Float
     tax: Float
     total: Float!
-    status: OrderStatus!
+    status: String!
     createdAt: String!
     updatedAt: String!
   }
@@ -38,6 +30,12 @@ export default gql`
     shippingReceiver: String!
     shippingPhone: String!
     paymentMethod: String!
+  }
+
+  input UpdateOrderInput {
+    id: ID!
+    status: String
+    paymentTransactionId: String
   }
 
   type OrderResponse {
@@ -57,8 +55,7 @@ export default gql`
 
   extend type Mutation {
     createOrder(input: CreateOrderInput!): OrderResponse!
-    updateOrderStatus(id: ID!, status: OrderStatus!): OrderResponse!
-    updateOrder(id: ID!, status: OrderStatus, paymentTransactionId: String): OrderResponse!
+    updateOrder(input: UpdateOrderInput!): OrderResponse!
     cancelOrder(id: ID!): OrderResponse!
   }
 `; 

@@ -8,7 +8,7 @@
  * 2. 执行 node examples/auth/verify.js <验证令牌>
  */
 
-import { verifyUserWithPrisma, updateUserWithPrisma } from '../../../src/models/User.js';
+import { verifyUser, updateUser } from '../../../src/models/userModel.js';
 
 // 加载环境变量
 import dotenv from 'dotenv';
@@ -19,7 +19,7 @@ async function verifyUserEmail(token) {
     console.log(`正在验证令牌: ${token}`);
     
     // 查找具有指定验证令牌的用户
-    const { data: user, error: verifyError } = await verifyUserWithPrisma(token);
+    const { data: user, error: verifyError } = await verifyUser(token);
     
     if (verifyError) {
       console.error('验证过程中发生错误:', verifyError);
@@ -38,7 +38,7 @@ async function verifyUserEmail(token) {
     }
     
     // 更新用户为已验证状态
-    const { data: updatedUser, error: updateError } = await updateUserWithPrisma(user.id, {
+    const { data: updatedUser, error: updateError } = await updateUser(user.id, {
       isVerified: true
     });
     

@@ -7,7 +7,7 @@
  * 1. 执行 node test/db/auth/register.js
  */
 
-import { createUserWithPrisma } from '../../src/models/User.js';
+import { createUser } from '../../src/models/User.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
@@ -42,7 +42,7 @@ async function registerUser() {
     console.log('正在创建用户...');
     
     // 创建用户
-    const { data: user, error } = await createUserWithPrisma(userData);
+    const { data: user, error } = await createUser(userData);
     
     if (error) {
       console.error('创建用户失败:', error);

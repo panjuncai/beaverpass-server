@@ -1,9 +1,10 @@
 import { gql } from 'apollo-server-express';
-import baseTypeDefs from './baseTypeDefs.js';
 import userTypeDefs from './userTypeDefs.js';
 import chatTypeDefs from './chatTypeDefs.js';
 import postTypeDefs from './postTypeDefs.js';
 import orderTypeDefs from './orderTypeDefs.js';
+import uploadTypes from './uploadTypes.js';
+import scalarTypeDefs from './scalarTypeDefs.js';
 
 const rootTypeDefs = gql`
   type Query {
@@ -17,9 +18,10 @@ const rootTypeDefs = gql`
 
 export default [
   rootTypeDefs,
-  baseTypeDefs,
+  scalarTypeDefs,
   userTypeDefs,
   chatTypeDefs,
   postTypeDefs,
-  orderTypeDefs
+  orderTypeDefs,
+  uploadTypes
 ]; 

@@ -42,11 +42,9 @@ const GET_ORDER = `
       updatedAt
       buyer {
         id
-        username
       }
       seller {
         id
-        username
       }
       post {
         id
@@ -70,7 +68,6 @@ const GET_MY_BUYER_ORDERS = `
           createdAt
           seller {
             id
-            username
           }
         }
         cursor
@@ -98,7 +95,6 @@ const GET_MY_SELLER_ORDERS = `
           createdAt
           buyer {
             id
-            username
           }
         }
         cursor

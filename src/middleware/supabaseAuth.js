@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import supabase from '../config/supabase.js';
+import prisma from '../lib/prisma.js';
 
 /**
  * 验证 Supabase JWT 令牌
@@ -16,7 +17,7 @@ export const verifySupabaseToken = async (token) => {
     console.log('🔍 令牌验证: 开始验证令牌');
     console.log(`🔍 令牌前20个字符: ${token.substring(0, 20)}...`);
 
-    // 方法1: 使用 Supabase Auth API 直接验证令牌
+    // 使用 Supabase Auth API 直接验证令牌
     console.log('🔍 令牌验证: 使用 Supabase Auth API 验证令牌...');
     
     // 设置 Supabase 客户端的会话

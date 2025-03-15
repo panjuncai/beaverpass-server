@@ -3,7 +3,7 @@ import prisma from '../lib/prisma.js';
 // Connect to PostgreSQL via Prisma
 export async function connectDB() {
   try {
-    await prisma.$connect();
+    //await prisma.$connect();
     console.log('🚀 数据库通过 Prisma 连接成功');
     return prisma;
   } catch (error) {

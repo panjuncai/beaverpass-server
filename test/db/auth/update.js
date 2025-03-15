@@ -8,7 +8,7 @@
  * 2. 执行 node examples/auth/update.js <用户ID>
  */
 
-import { getUserByIdWithPrisma, updateUserWithPrisma } from '../../src/models/User.js';
+import { getUserById, updateUser } from '../../src/models/User.js';
 
 // 加载环境变量
 import dotenv from 'dotenv';
@@ -19,7 +19,7 @@ async function updateUserInfo(userId, userData) {
     console.log(`正在更新用户 ID: ${userId}`);
     
     // 首先检查用户是否存在
-    const { data: existingUser, error: getUserError } = await getUserByIdWithPrisma(userId);
+    const { data: existingUser, error: getUserError } = await getUserById(userId);
     
     if (getUserError) {
       console.error('获取用户信息失败:', getUserError);
@@ -35,7 +35,7 @@ async function updateUserInfo(userId, userData) {
     console.log(JSON.stringify(existingUser, null, 2));
     
     // 更新用户信息
-    const { data: updatedUser, error: updateError } = await updateUserWithPrisma(userId, userData);
+    const { data: updatedUser, error: updateError } = await updateUser(userId, userData);
     
     if (updateError) {
       console.error('更新用户信息失败:', updateError);

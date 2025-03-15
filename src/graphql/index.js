@@ -8,6 +8,9 @@ import supabase from '../config/supabase.js';
 import typeDefs from './typeDefs/index.js';
 import resolvers from './resolvers/index.js';
 
+import {UserModel} from '../models/userModel.js';
+import {PostModel} from '../models/postModel.js';
+import {OrderModel} from '../models/orderModel.js';
 const prisma = new PrismaClient();
 
 // Create executable schema
@@ -18,6 +21,12 @@ let schema = makeExecutableSchema({
 
 // Apply constraint directive
 schema = constraintDirective()(schema);
+
+const models={
+  user:new UserModel(prisma),
+  post:new PostModel(prisma),
+  order:new OrderModel(prisma)
+}
 
 // Context function for HTTP requests
 const context = async ({ req }) => {
@@ -42,6 +51,7 @@ const context = async ({ req }) => {
       user: req.user, 
       prisma,
       supabase,
+      models,
       // 添加一个函数来记录响应
       logResponse: (data) => {
         console.log('\n==================================================');
@@ -62,6 +72,7 @@ const context = async ({ req }) => {
     return { 
       prisma,
       supabase,
+      models,
       // 添加一个函数来记录响应
       logResponse: (data) => {
         console.log('\n==================================================');
@@ -88,6 +99,7 @@ const context = async ({ req }) => {
       user, 
       prisma,
       supabase,
+      models,
       // 添加一个函数来记录响应
       logResponse: (data) => {
         console.log('\n==================================================');
@@ -102,6 +114,7 @@ const context = async ({ req }) => {
     return { 
       prisma,
       supabase,
+      models,
       // 添加一个函数来记录响应
       logResponse: (data) => {
         console.log('\n==================================================');

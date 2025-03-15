@@ -6,9 +6,11 @@ const uploadResolvers = {
   },
   
   Mutation: {
-    getPresignedUrl: async (_, { fileName, fileType, fileSize }, { req }) => {
+    getPresignedUrl: async (_, { input }, { user}) => {
+      const { fileName, fileType, fileSize } = input;
+      
       // 验证用户是否已登录
-      if (!req.session.user) {
+      if (!user) {
         throw new Error('Authentication required');
       }
       

@@ -14,35 +14,6 @@ drop type delivery_type_enum;
 drop type post_status_enum;
 drop type order_status_enum;
 
--- 消息类型
-CREATE TYPE message_type_enum AS ENUM ('TEXT', 'IMAGE', 'POST');
-
--- 帖子分类
-CREATE TYPE post_category_enum AS ENUM (
-  'LIVING_ROOM_FURNITURE',
-  'BEDROOM_FURNITURE',
-  'DINING_ROOM_FURNITURE',
-  'OFFICE_FURNITURE',
-  'OUTDOOR_FURNITURE',
-  'STORAGE',
-  'OTHER'
-);
-
--- 帖子成色
-CREATE TYPE post_condition_enum AS ENUM (
-  'LIKE_NEW', 'GENTLY_USED', 'MINOR_SCRATCHES', 'STAINS', 'NEEDS_REPAIR'
-);
-
--- 配送方式
-CREATE TYPE delivery_type_enum AS ENUM ('HOME_DELIVERY', 'PICKUP', 'BOTH');
-
--- 帖子状态
-CREATE TYPE post_status_enum AS ENUM ('ACTIVE', 'INACTIVE', 'SOLD', 'DELETED');
-
--- 订单状态
-CREATE TYPE order_status_enum AS ENUM (
-  'PENDING_PAYMENT', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELED', 'REFUNDED'
-);
 
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -58,17 +29,17 @@ CREATE TABLE users (
 
 CREATE TABLE posts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  category post_category_enum NOT NULL,
+  category TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL CHECK (char_length(description) <= 500),
-  condition post_condition_enum NOT NULL,
+  condition TEXT NOT NULL,
   
   amount numeric(12,2) NOT NULL DEFAULT 0,
   is_negotiable BOOLEAN DEFAULT FALSE,
 
-  delivery_type delivery_type_enum NOT NULL,
+  delivery_type TEXT NOT NULL,
   poster_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  status post_status_enum DEFAULT 'ACTIVE',
+  status TEXT NOT NULL DEFAULT 'ACTIVE',
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -112,7 +83,7 @@ CREATE TABLE messages (
 
   content TEXT,
   post_id UUID REFERENCES posts(id) ON DELETE SET NULL,
-  message_type message_type_enum DEFAULT 'TEXT',
+  message_type TEXT NOT NULL DEFAULT 'TEXT',
 
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -159,7 +130,7 @@ CREATE TABLE orders (
   total NUMERIC(12,2) NOT NULL,
 
   -- 订单状态
-  status order_status_enum DEFAULT 'PENDING_PAYMENT',
+  status TEXT NOT NULL DEFAULT 'PENDING_PAYMENT',
 
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

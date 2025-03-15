@@ -1,11 +1,9 @@
 import { AuthenticationError } from 'apollo-server-express';
-import prisma from '../../lib/prisma.js';
-
 
 const userResolvers = {
   Query: {
     // 获取当前登录用户信息
-    me: async (_, __, { user }) => {
+    me: async (_, __, { user, models }) => {
       console.log('👤 执行 me 查询');
       
       if (!user) {
@@ -13,12 +11,25 @@ const userResolvers = {
         throw new AuthenticationError('Not logged in');
       }
       
-      console.log('✅ me 查询成功:', user.id);
-      return user;
+      try {
+        // 从数据库获取用户详细信息
+        const dbUser = await models.user.getUserById(user.id);
+        
+        if (!dbUser) {
+          console.log(`🚫 未找到用户: ID = ${user.id}`);
+          throw new Error(`User not found in database: ${user.id}`);
+        }
+        
+        console.log('✅ me 查询成功:', dbUser.id);
+        return dbUser;
+      } catch (error) {
+        console.error(`🚫 获取用户失败: ${error.message}`);
+        throw new Error(`Failed to get user information: ${error.message}`);
+      }
     },
     
     // 根据 ID 获取用户信息
-    user: async (_, { id }, { user, prisma }) => {
+    user: async (_, { id }, { user, models }) => {
       console.log(`👤 执行 user 查询: ID = ${id}`);
       
       if (!user) {
@@ -28,17 +39,15 @@ const userResolvers = {
       
       try {
         console.log(`🔍 正在查询用户: ID = ${id}`);
-        const data = await prisma.user.findUnique({
-          where: { id: id }
-        });
+        const dbUser = await models.user.getUserById(id); 
         
-        if (!data) {
+        if (!dbUser) {
           console.log(`🚫 未找到用户: ID = ${id}`);
           throw new Error(`User not found: ${id}`);
         }
         
         console.log(`✅ 成功获取用户: ID = ${id}`);
-        return data;
+        return dbUser;
       } catch (error) {
         console.error(`🚫 获取用户失败: ${error.message}`);
         throw new Error(`Failed to get user information: ${error.message}`);
@@ -49,7 +58,7 @@ const userResolvers = {
   
   Mutation: {
     // 更新用户资料
-    updateUser: async (_, { input }, { user, prisma }) => {
+    updateUser: async (_, { input }, { user, models }) => {
       console.log('👤 执行 updateUser 变更');
       console.log('📝 更新数据:', JSON.stringify(input, null, 2));
       
@@ -64,7 +73,10 @@ const userResolvers = {
         console.log(`🔍 正在更新用户: ID = ${user.id}`);
         
         // 准备更新数据
-        const updateData = {};
+        const updateData = {
+          id: user.id
+        };
+        
         if (firstName) updateData.firstName = firstName;
         if (lastName) updateData.lastName = lastName;
         if (avatar) updateData.avatar = avatar;
@@ -74,63 +86,39 @@ const userResolvers = {
         console.log('📝 更新字段:', JSON.stringify(updateData, null, 2));
         
         // 更新用户资料
-        const updatedUser = await prisma.user.update({
-          where: { id: user.id },
-          data: updateData
-        });
+        const dbUser = await models.user.updateUser(updateData);
+        
+        if (!dbUser) {
+          throw new Error(`Failed to update user: ${error.message}`);
+        }
         
         console.log('✅ 用户更新成功');
         
-        return {
-          code: 200,
-          success: true,
-          message: 'User information updated successfully',
-          user: updatedUser
-        };
+        return dbUser;
       } catch (error) {
         console.error(`🚫 更新用户失败: ${error.message}`);
-        return {
-          code: 500,
-          success: false,
-          message: `Failed to update: ${error.message}`,
-          user: null
-        };
+        throw new Error(`Failed to update user: ${error.message}`);
       }
     },
   },
   
   User: {
-    posts: async (user) => {
+    posts: async (user, _, { models }) => {
       console.log(`🔍 获取用户帖子: userID = ${user.id}`);
       try {
-        const posts = await prisma.post.findMany({
-          where: { posterId: user.id },
-          include: {
-            images: true
-          }
-        });
+        const posts = await models.post.getPostsByPosterId(user.id);
         console.log(`✅ 成功获取用户帖子: count = ${posts.length}`);
         return posts;
       } catch (error) {
         console.error(`🚫 获取用户帖子失败: ${error.message}`);
-        return [];
+        throw new Error(`Failed to get user posts: ${error.message}`);
       }
     },
     
-    buyerOrders: async (user) => {
+    buyerOrders: async (user, _, { models }) => {
       console.log(`🔍 获取买家订单: userID = ${user.id}`);
       try {
-        const orders = await prisma.order.findMany({
-          where: { buyerId: user.id },
-          include: {
-            post: {
-              include: {
-                images: true
-              }
-            },
-            seller: true
-          }
-        });
+        const orders = await models.order.getOrdersByBuyerId(user.id);
         console.log(`✅ 成功获取买家订单: count = ${orders.length}`);
         return orders;
       } catch (error) {
@@ -139,20 +127,10 @@ const userResolvers = {
       }
     },
     
-    sellerOrders: async (user) => {
+    sellerOrders: async (user, _, { models }) => {
       console.log(`🔍 获取卖家订单: userID = ${user.id}`);
       try {
-        const orders = await prisma.order.findMany({
-          where: { sellerId: user.id },
-          include: {
-            post: {
-              include: {
-                images: true
-              }
-            },
-            buyer: true
-          }
-        });
+        const orders = await models.order.getOrdersBySellerId(user.id);
         console.log(`✅ 成功获取卖家订单: count = ${orders.length}`);
         return orders;
       } catch (error) {

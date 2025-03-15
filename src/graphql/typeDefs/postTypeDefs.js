@@ -1,50 +1,20 @@
 import { gql } from 'apollo-server-express';
 
 const postTypeDefs = gql`
-  enum PostCategory {
-    LIVING_ROOM_FURNITURE
-    BEDROOM_FURNITURE
-    DINING_ROOM_FURNITURE
-    OFFICE_FURNITURE
-    OUTDOOR_FURNITURE
-    STORAGE
-    OTHER
-  }
-
-  enum PostCondition {
-    LIKE_NEW
-    GENTLY_USED
-    MINOR_SCRATCHES
-    STAINS
-    NEEDS_REPAIR
-  }
-
-  enum DeliveryType {
-    HOME_DELIVERY
-    PICKUP
-    BOTH
-  }
-
-  enum PostStatus {
-    ACTIVE
-    INACTIVE
-    SOLD
-    DELETED
-  }
-
+  
   # 帖子类型
   type Post {
     id: ID!
-    category: PostCategory!
+    category: String!
     title: String!
     description: String!
-    condition: PostCondition!
+    condition: String!
     amount: Float!
     isNegotiable: Boolean
-    deliveryType: DeliveryType!
+    deliveryType: String!
     poster: User
     posterId: ID
-    status: PostStatus
+    status: String
     createdAt: String
     updatedAt: String
     images: [PostImage]
@@ -59,19 +29,6 @@ const postTypeDefs = gql`
     createdAt: String
   }
 
-  # 帖子响应类型
-  type PostRsp implements BaseRsp {
-    code: Int!
-    msg: String!
-    data: Post
-  }
-
-  # 帖子列表响应类型
-  type PostListRsp implements BaseRsp {
-    code: Int!
-    msg: String!
-    data: [Post]
-  }
 
   # 帖子过滤条件输入
   input PostFilterInput {
@@ -84,27 +41,27 @@ const postTypeDefs = gql`
 
   # 创建帖子输入
   input CreatePostInput {
-    category: PostCategory!
+    category: String!
     title: String!
     description: String!
-    condition: PostCondition!
+    condition: String!
     amount: Float!
     isNegotiable: Boolean
-    deliveryType: DeliveryType!
+    deliveryType: String!
     images: [PostImageInput]!
   }
 
   # 更新帖子输入
   input UpdatePostInput {
     id: ID!
-    category: PostCategory
+    category: String
     title: String
     description: String
-    condition: PostCondition
+    condition: String
     amount: Float
     isNegotiable: Boolean
-    deliveryType: DeliveryType
-    status: PostStatus
+    deliveryType: String
+    status: String
   }
 
   # 帖子图片输入
@@ -128,22 +85,22 @@ const postTypeDefs = gql`
   # 扩展查询
   extend type Query {
     # 获取所有帖子（支持过滤）
-    getPostsByFilter(filter: PostFilterInput): PostListRsp!
+    getPostsByFilter(filter: PostFilterInput): [Post]
     
     # 获取单个帖子
-    getPostById(id: ID!): PostRsp!
+    getPostById(id: ID): Post
     
     # 获取用户的帖子
-    getPostsByPosterId(posterId: ID!): PostListRsp!
+    getPostsByPosterId(posterId: ID!): [Post]
     
     # 获取当前用户的帖子
-    getMyPosts: PostListRsp!
+    getMyPosts: [Post]
 
     posts(
-      category: PostCategory
-      condition: PostCondition
-      deliveryType: DeliveryType
-      status: PostStatus
+      category: String
+      condition: String
+      deliveryType: String
+      status: String
       limit: Int
       offset: Int
     ): [Post]
@@ -154,22 +111,22 @@ const postTypeDefs = gql`
   # 扩展变更
   extend type Mutation {
     # 创建帖子
-    createPost(input: CreatePostInput!): PostRsp!
+    createPost(input: CreatePostInput!): Post
     
     # 更新帖子
-    updatePost(input: UpdatePostInput!): PostRsp!
+    updatePost(input: UpdatePostInput!): Post
     
     # 更新帖子状态
-    updatePostStatus(id: ID!, status: String!): PostRsp!
+    updatePostStatus(id: ID!, status: String!): Post
     
-    # 删除帖子（实际上是将状态设置为deleted）
-    deletePost(id: ID!): PostRsp!
+    # 删除帖子(实际上是将状态设置为deleted)
+    deletePost(id: ID!): Post
 
     # 添加帖子图片
-    addPostImage(input: AddPostImageInput!): PostRsp!
+    addPostImage(input: AddPostImageInput!): Post
     
     # 删除帖子图片
-    deletePostImage(input: DeletePostImageInput!): PostRsp!
+    deletePostImage(input: DeletePostImageInput!): Post
   }
 `;
 export default postTypeDefs;
