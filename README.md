@@ -78,4 +78,51 @@ beaverpass-server/
 如果遇到与环境变量相关的错误，请确保：
 
 1. 所有必需的环境变量都已正确设置
-2. 数据库连接 URL 格式正确且可访问 
+2. 数据库连接 URL 格式正确且可访问
+
+## Vercel 部署说明
+
+### 前提条件
+
+1. 一个 Vercel 账户
+2. 一个 PostgreSQL 数据库（可以使用 Supabase、Neon、Railway 等）
+3. 一个 Supabase 项目（用于身份验证）
+4. 一个 AWS S3 存储桶（用于文件上传）
+
+### 部署步骤
+
+1. 在 Vercel 上导入你的 GitHub 仓库
+2. 配置以下环境变量：
+   - `DATABASE_URL`: PostgreSQL 数据库连接字符串
+   - `DIRECT_URL`: PostgreSQL 数据库直接连接字符串（如果使用连接池）
+   - `SUPABASE_URL`: Supabase 项目 URL
+   - `SUPABASE_SERVICE_KEY`: Supabase 服务密钥
+   - `AWS_REGION`: AWS 区域
+   - `AWS_S3_BUCKET_NAME`: S3 存储桶名称
+   - `AWS_ACCESS_KEY_ID`: AWS 访问密钥 ID
+   - `AWS_SECRET_ACCESS_KEY`: AWS 秘密访问密钥
+   - `NODE_ENV`: 设置为 `production`
+3. 部署项目
+
+### 本地开发
+
+1. 克隆仓库
+2. 安装依赖：`npm install`
+3. 创建 `.env` 文件并配置环境变量
+4. 运行开发服务器：`npm run dev`
+
+### 数据库迁移
+
+Vercel 部署时会自动运行 `prisma generate` 和 `prisma migrate deploy` 命令。
+
+## API 端点
+
+- GraphQL API: `/graphql`
+
+## 技术栈
+
+- Apollo Server
+- Prisma ORM
+- PostgreSQL
+- Supabase 身份验证
+- AWS S3 文件存储 

@@ -14,7 +14,8 @@
     "check-env": "node src/scripts/checkEnv.js",
     "setup-env": "node src/scripts/setupEnv.js",
     "prestart": "npm run check-env",
-    "predev": "npm run check-env"
+    "predev": "npm run check-env",
+    "vercel-build": "prisma generate && prisma migrate deploy"
   },
   "keywords": [],
   "type": "module",
@@ -26,6 +27,7 @@
     "@prisma/client": "^6.4.1",
     "@supabase/supabase-js": "^2.49.1",
     "apollo-server-express": "^3.13.0",
+    "apollo-server-micro": "^3.13.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -35,6 +37,8 @@
     "graphql-middleware": "^6.1.35",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "micro": "^10.0.1",
+    "micro-cors": "^0.1.1",
     "mongoose": "^8.9.4",
     "nodemailer": "^6.9.16",
     "pg": "^8.13.3",
