@@ -110,16 +110,27 @@ const startServer = apolloServer.start();
 
 // 设置 CORS
 const cors = Cors({
-  allowMethods: ['POST', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-  origin: ['https://beaverpass-client.vercel.app','https://www.bigclouder.com', 'https://bigclouder.com','http://localhost:5173']
+  allowMethods: ['POST', 'OPTIONS', 'GET'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposeHeaders: ['Access-Control-Allow-Origin'],
+  origin: ['https://beaverpass-client.vercel.app', 'https://www.bigclouder.com', 'https://bigclouder.com', 'http://localhost:5173'],
+  allowCredentials: true,
+  maxAge: 86400 // 24 hours in seconds
 });
 
 // 导出处理函数
 export default cors(async (req, res) => {
+  // 手动设置 CORS 头，确保它们被正确应用
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400');
+
+  // 处理预检请求
   if (req.method === 'OPTIONS') {
-    res.end();
-    return false;
+    res.status(200).end();
+    return;
   }
   
   await startServer;
@@ -139,7 +150,7 @@ export default cors(async (req, res) => {
   }
   
   await apolloServer.createHandler({
-    path: '/graphql',
+    path: '/api/graphql',
   })(req, res);
 });
 

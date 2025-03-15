@@ -8,8 +8,26 @@
   ],
   "routes": [
     {
+      "src": "/api/graphql",
+      "dest": "/api/graphql.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Max-Age": "86400"
+      }
+    },
+    {
       "src": "/graphql",
-      "dest": "/api/graphql.js"
+      "dest": "/api/graphql.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Max-Age": "86400"
+      }
     },
     {
       "src": "/api/(.*)",
@@ -18,5 +36,8 @@
   ],
   "env": {
     "NODE_ENV": "production"
+  },
+  "buildEnv": {
+    "PRISMA_CLI_BINARY_TARGETS": "native,rhel-openssl-1.0.x"
   }
 } 

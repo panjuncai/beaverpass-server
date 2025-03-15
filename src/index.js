@@ -99,6 +99,7 @@ async function startServer() {
     // 设置 CORS 策略
     const allowedOrigins = [
       "https://www.bigclouder.com",
+      "https://beaverpass-client.vercel.app",
       "https://bigclouder.com",
       "http://localhost:5173",
     ];
