@@ -15,7 +15,7 @@
     "setup-env": "node src/scripts/setupEnv.js",
     "prestart": "npm run check-env",
     "predev": "npm run check-env",
-    "vercel-build": "npx prisma validate && npx prisma generate"
+    "vercel-build": "node prisma-setup.js && npm run build"
   },
   "keywords": [],
   "type": "module",
