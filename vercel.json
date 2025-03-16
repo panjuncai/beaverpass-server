@@ -19,6 +19,11 @@
         "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization"
       }
     },
+    { 
+      "src": "/auth/callback",
+      "dest": "/index.html",
+      "status": 200
+    },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
