@@ -1,1 +1,1 @@
-pm2 restart ecosystem.config.js --env production
+pm2 restart ecosystem.config.cjs --env production
