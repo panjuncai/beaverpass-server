@@ -36,31 +36,41 @@ const server = new ApolloServer({
 // 初始化Apollo Server
 const startServer = server.start();
 
-// 完全开放跨域访问
-const allowCors = fn => async (req, res) => {
-  // 允许所有来源
+// 处理请求的函数
+export default async function handler(req, res) {
+  // 记录请求信息
+  console.log(`[${new Date().toISOString()}] 收到请求:`, {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+  });
+
+  // 设置 CORS 头
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', '*');
-
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // 处理 OPTIONS 请求
   if (req.method === 'OPTIONS') {
+    console.log('处理 OPTIONS 请求');
     res.status(200).end();
     return;
   }
 
-  return await fn(req, res);
-};
-
-const handler = allowCors(async (req, res) => {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+  try {
+    // 确保服务器已启动
+    await server.start();
+    
+    // 创建处理程序
+    const apolloHandler = server.createHandler({ path: '/api/graphql' });
+    
+    // 调用 Apollo 处理程序
+    return apolloHandler(req, res);
+  } catch (error) {
+    console.error('GraphQL 处理错误:', error);
+    res.status(500).json({ error: '服务器内部错误' });
   }
-  await server.start();
-  await server.createHandler({ path: '/api/graphql' })(req, res);
-});
-
-export default handler;
+}
 
 export const config = {
   api: {

@@ -1,8 +1,24 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/api/graphql", "dest": "/api/graphql.js" },
-    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { 
+      "src": "/api/graphql", 
+      "dest": "/api/graphql.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE",
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization"
+      }
+    },
+    { 
+      "src": "/api/(.*)", 
+      "dest": "/api/$1",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE",
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization"
+      }
+    },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
