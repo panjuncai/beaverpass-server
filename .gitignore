@@ -132,3 +132,5 @@ dist
 .pnp.*
 
 .DS_Store
+
+ecosystem.config.cjs
