@@ -1,37 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    }
-  ],
   "routes": [
-    {
-      "src": "/api/graphql",
-      "methods": ["OPTIONS"],
-      "dest": "/api/cors-preflight.js"
-    },
-    {
-      "src": "/api/graphql",
-      "dest": "/api/graphql.js"
-    },
-    {
-      "src": "/graphql",
-      "methods": ["OPTIONS"],
-      "dest": "/api/cors-preflight.js"
-    },
-    {
-      "src": "/graphql",
-      "dest": "/api/graphql.js"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "PRISMA_CLI_BINARY_TARGETS": "native,rhel-openssl-1.0.x"
-  }
-} 
+    { "src": "/api/graphql", "dest": "/api/graphql.js" }
+  ]
+}

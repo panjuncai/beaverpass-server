@@ -1,6 +1,4 @@
-import jwt from 'jsonwebtoken';
 import supabase from '../config/supabase.js';
-import prisma from '../lib/prisma.js';
 
 /**
  * 验证 Supabase JWT 令牌
