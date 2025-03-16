@@ -121,7 +121,14 @@ const cors = Cors({
 // 导出处理函数
 export default cors(async (req, res) => {
   // 手动设置 CORS 头，确保它们被正确应用
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  // 当请求包含凭证时，Access-Control-Allow-Origin 不能为通配符 *
+  const origin = req.headers.origin;
+  const allowedOrigins = ['https://beaverpass-client.vercel.app', 'https://www.beaverpass-client.vercel.app', 'https://www.bigclouder.com', 'https://bigclouder.com', 'http://localhost:5173'];
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
   res.setHeader('Access-Control-Allow-Credentials', 'true');

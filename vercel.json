@@ -11,7 +11,7 @@
       "src": "/api/graphql",
       "dest": "/api/graphql.js",
       "headers": {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://beaverpass-client.vercel.app,https://www.beaverpass-client.vercel.app,https://www.bigclouder.com,https://bigclouder.com,http://localhost:5173",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept",
         "Access-Control-Allow-Credentials": "true",
@@ -22,7 +22,7 @@
       "src": "/graphql",
       "dest": "/api/graphql.js",
       "headers": {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://beaverpass-client.vercel.app",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept",
         "Access-Control-Allow-Credentials": "true",
