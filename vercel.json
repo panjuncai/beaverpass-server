@@ -35,9 +35,7 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
-  },
-  "buildEnv": {
+    "NODE_ENV": "production",
     "PRISMA_CLI_BINARY_TARGETS": "native,rhel-openssl-1.0.x"
   }
 } 
