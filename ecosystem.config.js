@@ -2,7 +2,7 @@ module.exports = {
     apps: [
       {
         name: "beaverpass",
-        script: "src/app.js",
+        script: "src/index.js",
         // 在启动时预加载 dotenv
         node_args: "-r dotenv/config",
         env: {
