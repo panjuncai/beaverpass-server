@@ -36,18 +36,12 @@ const server = new ApolloServer({
 // 初始化Apollo Server
 const startServer = server.start();
 
-// 设置允许的来源
-const corsOptions = {
-  origin: 'https://beaverpass-client.vercel.app',
-  methods: ['POST', 'OPTIONS'],
-  credentials: true,
-};
-
+// 完全开放跨域访问
 const allowCors = fn => async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', 'https://beaverpass-client.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // 允许所有来源
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', '*');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -57,16 +51,16 @@ const allowCors = fn => async (req, res) => {
   return await fn(req, res);
 };
 
-const handler = server.createHandler({ path: '/api/graphql' });
-
-export default async (req, res) => {
+const handler = allowCors(async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
   await server.start();
-  await handler(req, res);
-}
+  await server.createHandler({ path: '/api/graphql' })(req, res);
+});
+
+export default handler;
 
 export const config = {
   api: {

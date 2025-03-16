@@ -1,16 +1,8 @@
 export default function handler(req, res) {
-  // 获取请求的来源
-  const origin = req.headers.origin;
-  const allowedOrigins = ['https://beaverpass-client.vercel.app'];
-  
-  // 设置 CORS 头
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // 完全开放跨域访问
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Access-Control-Max-Age', '86400');
   
   // 对于 OPTIONS 请求，直接返回 200 状态码

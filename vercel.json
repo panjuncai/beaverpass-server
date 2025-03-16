@@ -1,6 +1,9 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/api/graphql", "dest": "/api/graphql.js" }
+    { "src": "/api/graphql", "dest": "/api/graphql.js" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
