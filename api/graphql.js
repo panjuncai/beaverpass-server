@@ -123,7 +123,7 @@ export default cors(async (req, res) => {
   // 手动设置 CORS 头，确保它们被正确应用
   // 当请求包含凭证时，Access-Control-Allow-Origin 不能为通配符 *
   const origin = req.headers.origin;
-  const allowedOrigins = ['https://beaverpass-client.vercel.app', 'https://www.beaverpass-client.vercel.app', 'https://www.bigclouder.com', 'https://bigclouder.com', 'http://localhost:5173'];
+  const allowedOrigins = ['https://beaverpass-client.vercel.app'];
   
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
