@@ -113,7 +113,7 @@ const cors = Cors({
   allowMethods: ['POST', 'OPTIONS', 'GET'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   exposeHeaders: ['Access-Control-Allow-Origin'],
-  origin: ['https://beaverpass-client.vercel.app', 'https://www.bigclouder.com', 'https://bigclouder.com', 'http://localhost:5173'],
+  origin: ['https://beaverpass-client.vercel.app'],
   allowCredentials: true,
   maxAge: 86400 // 24 hours in seconds
 });

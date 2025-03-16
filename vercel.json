@@ -9,25 +9,21 @@
   "routes": [
     {
       "src": "/api/graphql",
-      "dest": "/api/graphql.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://beaverpass-client.vercel.app",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Max-Age": "86400"
-      }
+      "methods": ["OPTIONS"],
+      "dest": "/api/cors-preflight.js"
+    },
+    {
+      "src": "/api/graphql",
+      "dest": "/api/graphql.js"
     },
     {
       "src": "/graphql",
-      "dest": "/api/graphql.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://beaverpass-client.vercel.app",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Max-Age": "86400"
-      }
+      "methods": ["OPTIONS"],
+      "dest": "/api/cors-preflight.js"
+    },
+    {
+      "src": "/graphql",
+      "dest": "/api/graphql.js"
     },
     {
       "src": "/api/(.*)",
